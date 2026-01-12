@@ -1,0 +1,304 @@
+<!-- =========================
+  ФАЙЛ: index.html
+  Назначение:
+  - Готовая страница в твоём стиле (как на скрине)
+  - Внутри есть готовый блок "Инструкция"
+  - Всё разбито на секции, чтобы ты мог вставлять/удалять блоки
+========================= -->
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR Видео-Метки</title>
+  <meta name="description" content="Наведи камеру на QR/изображение/здание — смотри видео поверх реальности." />
+
+  <!-- Подключаем внешний CSS -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- =========================================================
+    [БЛОК 1] ШАПКА (Header)
+    - Оставляем как у тебя (в стиле со скрина)
+    - Меню + кнопки + бургер на телефонах
+    Что можно менять:
+    - Названия пунктов меню
+    - Ссылки: ar/qr.html, projects.html
+  ========================================================== -->
+  <header class="topbar">
+    <div class="topbar__inner">
+
+      <!-- ЛЕВАЯ ЧАСТЬ: бренд -->
+      <a class="brand" href="index.html" aria-label="На главную">
+        <span class="brand__logo" aria-hidden="true"></span>
+        <span class="brand__text">AR Видео-Метки</span>
+        <span class="brand__badge" title="Версия">Beta</span>
+      </a>
+
+      <!-- ЦЕНТР: навигация (на больших экранах) -->
+      <nav class="nav" aria-label="Основная навигация">
+        <a class="nav__link" href="#demo">Демо</a>
+        <a class="nav__link" href="#how">Как работает</a>
+        <a class="nav__link" href="projects.html">Проекты</a>
+        <a class="nav__link" href="#support">Поддержка</a>
+      </nav>
+
+      <!-- ПРАВАЯ ЧАСТЬ: кнопки действий -->
+      <div class="actions">
+        <a class="btn btn--ghost" href="#demo">Открыть демо</a>
+        <a class="btn btn--primary" href="ar/qr.html">Запустить камеру</a>
+
+        <!-- Кнопка "?" — позже сделаем нормальную модалку -->
+        <button class="iconbtn" type="button" aria-label="Справка" id="helpBtn">?</button>
+      </div>
+
+      <!-- БУРГЕР для мобилок (когда меню и кнопки скрываются) -->
+      <button class="burger" type="button" aria-label="Открыть меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Мобильное меню (скрыто по умолчанию) -->
+    <div class="drawer" hidden>
+      <a class="drawer__link" href="#demo">Демо</a>
+      <a class="drawer__link" href="#how">Как работает</a>
+      <a class="drawer__link" href="projects.html">Проекты</a>
+      <a class="drawer__link" href="#support">Поддержка</a>
+
+      <div class="drawer__actions">
+        <a class="btn btn--ghost" href="#demo">Открыть демо</a>
+        <a class="btn btn--primary" href="ar/qr.html">Запустить камеру</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+    ОСНОВНОЙ КОНТЕНТ
+    Тут лежат блоки: Hero, Инструкция, Демо, Поддержка и т.д.
+  ========================================================== -->
+  <main class="wrap">
+
+    <!-- =========================================================
+      [БЛОК 2] HERO (первый экран под шапкой)
+      Можно удалить, если не нужен.
+      Можно менять текст под твой продукт.
+    ========================================================== -->
+    <section class="panel hero" id="hero">
+      <h1 class="hero__title">Видео поверх реальности.</h1>
+      <p class="hero__text">
+        Наведи камеру на метку (QR / фото / здание) — и увидишь видео, привязанное к объекту.
+      </p>
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="ar/qr.html">Запустить камеру</a>
+        <a class="btn btn--ghost" href="#how">Инструкция</a>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      [БЛОК 3] ИНСТРУКЦИЯ (то, что ты попросил)
+      В духе:
+      - выбери объект из списка
+      - или нажми "Запустить камеру"
+      - наведи на метку
+      - наслаждайтесь тенями прошлого :)
+    ========================================================== -->
+    <section class="panel instruction" id="how">
+
+      <!-- Заголовок инструкции -->
+      <div class="instruction__head">
+        <h2 class="instruction__title">Как смотреть AR-видео</h2>
+        <p class="instruction__subtitle">
+          Выберите объект внизу или просто нажмите <b>«Запустить камеру»</b>.
+        </p>
+      </div>
+
+      <!-- Список шагов -->
+      <ol class="steps" aria-label="Инструкция в 4 шага">
+
+        <!-- Шаг 1 -->
+        <li class="step">
+          <span class="step__num">1</span>
+          <div class="step__body">
+            <div class="step__label">Выберите объект</div>
+            <div class="step__text">
+              Внизу страницы выберите метку из списка <span class="muted">или</span> нажмите <b>«Запустить камеру»</b>.
+            </div>
+          </div>
+        </li>
+
+        <!-- Шаг 2 -->
+        <li class="step">
+          <span class="step__num">2</span>
+          <div class="step__body">
+            <div class="step__label">Разрешите камеру</div>
+            <div class="step__text">
+              Браузер спросит доступ — это нужно для распознавания меток.
+            </div>
+          </div>
+        </li>
+
+        <!-- Шаг 3 -->
+        <li class="step">
+          <span class="step__num">3</span>
+          <div class="step__body">
+            <div class="step__label">Наведите на метку</div>
+            <div class="step__text">
+              Наведите камеру на QR / изображение / фасад. Держите в кадре 1–2 секунды.
+            </div>
+          </div>
+        </li>
+
+        <!-- Шаг 4 -->
+        <li class="step">
+          <span class="step__num">4</span>
+          <div class="step__body">
+            <div class="step__label">Смотрите видео</div>
+            <div class="step__text">
+              Если видео не стартовало — нажмите <b>Play</b>. <span class="muted">Наслаждайтесь тенями прошлого.</span>
+            </div>
+          </div>
+        </li>
+
+      </ol>
+
+      <!-- Небольшая подсказка (опционально) -->
+      <div class="hint">
+        <span class="hint__dot" aria-hidden="true"></span>
+        <span class="hint__text">Совет: избегайте бликов и слишком тёмных сцен — так распознавание стабильнее.</span>
+      </div>
+    </section>
+
+    <!-- =========================================================
+  [БЛОК] ИСТОРИЧЕСКИЕ МЕСТА (карточки)
+  - Сетка карточек
+  - В каждой: фото, заголовок, описание, кнопка "Запустить камеру"
+  ВАЖНО:
+  - Ссылки на AR сейчас ведут на ar/image.html?place=...
+  - Позже мы сделаем ar/image.html так, чтобы он брал place и запускал нужное видео
+========================================================== -->
+<section class="panel" id="places">
+  <!-- Заголовок секции -->
+  <div class="sectionHead">
+    <h2 class="section__title">Исторические места</h2> <!-- Заголовок -->
+    <p class="section__text">Выберите место и нажмите «Запустить камеру», затем наведите на объект.</p> <!-- Подзаголовок -->
+  </div>
+
+  <!-- Сетка карточек -->
+  <div class="placeGrid">
+    <!-- =======================
+      Карточка 1: Дом купца Наумова
+      Описание: из твоего файла (см. текстовый файл)
+      Кнопка ведёт на AR-страницу с параметром place=naumov
+    ======================== -->
+    <article class="placeCard">
+      <!-- Фото карточки -->
+      <div class="placeCard__media">
+        <!-- ВАЖНО: положи фото в папку assets/ и проверь имя файла -->
+        <img
+          class="placeCard__img"
+          src="D:\Проекты\AR-приложение\Новая версия с видео и сайтом\фото\дом купца наумова.jpg"
+          alt="Дом купца Наумова"
+          loading="lazy"
+        />
+      </div>
+
+      <!-- Тело карточки -->
+      <div class="placeCard__body">
+        <div class="placeCard__tag">Архитектура</div> <!-- Небольшой тег -->
+        <h3 class="placeCard__title">Дом купца Наумова</h3> <!-- Заголовок -->
+        <p class="placeCard__desc">
+          Первый этаж дома купца Наумова каменный, второй — деревянный, украшен резьбой.
+          Это классический купеческий дом: на первом этаже была торговая лавка, на втором — жилые помещения.
+        </p> <!-- Описание (из файла) -->
+
+        <!-- Кнопки карточки -->
+        <div class="placeCard__actions">
+          <!-- Кнопка запуска камеры -->
+          <a class="btn btn--primary" href="ar/image.html?place=naumov">Запустить камеру</a>
+          <!-- Доп. кнопка (опционально): можно убрать -->
+          <a class="btn btn--ghost" href="#how">Инструкция</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- =======================
+      Карточка 2: Усадьба Чулкова
+      Описание: из твоего файла (см. текстовый файл)
+      Кнопка ведёт на AR-страницу с параметром place=chulkov
+    ======================== -->
+    <article class="placeCard">
+      <div class="placeCard__media">
+        <img
+          class="placeCard__img"
+          src="D:\Проекты\AR-приложение\Новая версия с видео и сайтом\фото\дом чулкова.jpg"
+          alt="Усадьба Чулкова"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="placeCard__body">
+        <div class="placeCard__tag">Музей</div>
+        <h3 class="placeCard__title">Усадьба Чулкова</h3>
+        <p class="placeCard__desc">
+          Усадьба Чулкова — дом в стиле модерн из красного кирпича с узорной кладкой.
+          С 1996 года здесь находится музей истории города.
+        </p>
+
+        <div class="placeCard__actions">
+          <a class="btn btn--primary" href="ar/image.html?place=chulkov">Запустить камеру</a>
+          <a class="btn btn--ghost" href="#how">Инструкция</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- =======================
+      Карточка 3: Музыкальное училище им. И.С. Палантая
+      ТЕКСТ: временная заглушка, потому что текстового файла тут нет [Unverified]
+      Кнопка ведёт на AR-страницу с параметром place=palantay
+    ======================== -->
+    <article class="placeCard">
+      <div class="placeCard__media">
+        <img
+          class="placeCard__img"
+          src="D:\Проекты\AR-приложение\Новая версия с видео и сайтом\фото\Музыкальное училище имени И. С. Палантая.jpg"
+          alt="Музыкальное училище имени И. С. Палантая"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="placeCard__body">
+        <div class="placeCard__tag">Культура</div>
+        <h3 class="placeCard__title">Музыкальное училище им. И. С. Палантая</h3>
+        <p class="placeCard__desc">
+          [Unverified] Пришли текст для этой карточки — я вставлю точное описание без домыслов.
+        </p>
+
+        <div class="placeCard__actions">
+          <a class="btn btn--primary" href="ar/image.html?place=palantay">Запустить камеру</a>
+          <a class="btn btn--ghost" href="#how">Инструкция</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+
+    <!-- =========================================================
+      [БЛОК 5] ПОДДЕРЖКА (заглушка)
+    ========================================================== -->
+    <section class="panel" id="support">
+      <h2 class="section__title">Поддержка</h2>
+      <p class="section__text">
+        Если не видит метку: приблизьтесь, добавьте света, уберите блики, удерживайте метку в кадре.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- Подключаем внешний JS (бургер-меню и кнопка справки) -->
+  <script src="header.js"></script>
+</body>
+</html>
