@@ -295,6 +295,263 @@
         Если не видит метку: приблизьтесь, добавьте света, уберите блики, удерживайте метку в кадре.
       </p>
     </section>
+<!-- =========================================================
+  [БЛОК КОНЦА САЙТА] 6 пунктов в конце
+  ВСТАВЬ В index.html ПЕРЕД </main> (в самый низ страницы)
+
+  Содержит:
+  1) FAQ / Если не работает
+  2) Как сделать лучше (качество трекинга)
+  3) CTA (следующий шаг)
+  4) Карта мест / фильтры (пока простая заглушка)
+  5) О проекте / Источники (заглушка — подставишь реальные источники)
+  6) Footer (подвал продукта)
+========================================================== -->
+
+<!-- =======================
+  1) FAQ / Если не работает
+======================= -->
+<section class="panel" id="faq">
+  <div class="sectionHead">
+    <h2 class="section__title">FAQ — если что-то не работает</h2>
+    <p class="section__text">Короткие решения самых частых проблем.</p>
+  </div>
+
+  <!-- Аккордеон на details/summary: работает без JS -->
+  <div class="faq">
+    <details class="faqItem">
+      <summary class="faqQ">Метка не распознаётся. Что делать?</summary>
+      <div class="faqA">
+        <ul>
+          <li>Добавьте света и уберите блики (стекло/глянец часто мешают).</li>
+          <li>Подойдите ближе и держите метку в кадре 1–2 секунды.</li>
+          <li>Старайтесь не сильно наклонять телефон относительно метки.</li>
+          <li>Если это здание — выберите участок фасада с контрастными деталями (окна, вывески, узоры). <span class="muted">[Inference]</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faqItem">
+      <summary class="faqQ">Видео не запускается автоматически</summary>
+      <div class="faqA">
+        <p>
+          На некоторых устройствах (особенно iOS) браузер требует действие пользователя.
+          Нажмите <b>Play</b> на экране AR.
+        </p>
+      </div>
+    </details>
+
+    <details class="faqItem">
+      <summary class="faqQ">Видео запускается без звука</summary>
+      <div class="faqA">
+        <p>
+          Браузер может включать видео без звука по умолчанию. В AR-режиме будет кнопка <b>Mute/Звук</b>.
+        </p>
+      </div>
+    </details>
+
+    <details class="faqItem">
+      <summary class="faqQ">Изображение “дёргается” или “плывёт”</summary>
+      <div class="faqA">
+        <ul>
+          <li>Держите метку в кадре дольше — трекингу нужно время стабилизироваться.</li>
+          <li>Старайтесь двигать телефон плавно, без резких рывков.</li>
+          <li>Уберите из кадра быстро движущиеся объекты (люди/машины). <span class="muted">[Inference]</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faqItem">
+      <summary class="faqQ">Какие устройства поддерживаются?</summary>
+      <div class="faqA">
+        <p>
+          Работает в современных мобильных браузерах. Если камера не открывается — проверьте разрешения
+          и откройте сайт по HTTPS (GitHub Pages — HTTPS).
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- =======================
+  2) Как сделать лучше (качество трекинга)
+======================= -->
+<section class="panel" id="quality">
+  <div class="sectionHead">
+    <h2 class="section__title">Как получить лучший результат</h2>
+    <p class="section__text">Пара правил, чтобы распознавание работало стабильнее.</p>
+  </div>
+
+  <div class="tipsGrid">
+    <div class="tipCard">
+      <div class="tipCard__title">Выбирайте “богатые” детали</div>
+      <div class="tipCard__text">
+        Метки лучше работают на контрастных, текстурных участках: окна, орнаменты, вывески, уникальные элементы.
+        <span class="muted">[Inference]</span>
+      </div>
+    </div>
+
+    <div class="tipCard">
+      <div class="tipCard__title">Избегайте бликов</div>
+      <div class="tipCard__text">
+        Глянец и отражения “ломают” распознавание. Поверните телефон, чтобы убрать блик.
+      </div>
+    </div>
+
+    <div class="tipCard">
+      <div class="tipCard__title">Свет важнее всего</div>
+      <div class="tipCard__text">
+        В темноте точность падает. Лучше дневной свет или яркое освещение.
+      </div>
+    </div>
+
+    <div class="tipCard">
+      <div class="tipCard__title">Правильная дистанция</div>
+      <div class="tipCard__text">
+        Начните ближе, чтобы метка уверенно нашлась, затем можно отойти и смотреть комфортнее.
+        <span class="muted">[Inference]</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =======================
+  3) CTA — следующий шаг
+======================= -->
+<section class="panel ctaPanel" id="next">
+  <div class="ctaPanel__left">
+    <h2 class="ctaPanel__title">Готовы попробовать?</h2>
+    <p class="ctaPanel__text">
+      Нажмите «Запустить камеру» и наведите на метку.
+      Или пролистайте к карточкам и выберите место.
+    </p>
+  </div>
+
+  <div class="ctaPanel__right">
+    <a class="btn btn--primary" href="ar/qr.html">Запустить камеру</a>
+    <a class="btn btn--ghost" href="#places">Выбрать место</a>
+  </div>
+</section>
+
+<!-- =======================
+  4) Карта мест / фильтры (пока простая заглушка)
+  - Это НЕ настоящая карта (без API)
+  - Просто “районы/категории”, чтобы структура уже была
+======================= -->
+<section class="panel" id="map">
+  <div class="sectionHead">
+    <h2 class="section__title">Карта мест</h2>
+    <p class="section__text">Пока это быстрый список категорий. Позже можно добавить настоящую карту.</p>
+  </div>
+
+  <div class="mapStub">
+    <div class="mapStub__left">
+      <div class="chipRow" aria-label="Фильтры">
+        <button class="chip isActive" type="button">Все</button>
+        <button class="chip" type="button">Архитектура</button>
+        <button class="chip" type="button">Музеи</button>
+        <button class="chip" type="button">Культура</button>
+      </div>
+
+      <ul class="placeList">
+        <li class="placeList__item">
+          <span class="placeList__name">Дом купца Наумова</span>
+          <a class="placeList__btn" href="ar/image.html?place=naumov">Камера</a>
+        </li>
+        <li class="placeList__item">
+          <span class="placeList__name">Усадьба Чулкова</span>
+          <a class="placeList__btn" href="ar/image.html?place=chulkov">Камера</a>
+        </li>
+        <li class="placeList__item">
+          <span class="placeList__name">Музыкальное училище им. И. С. Палантая</span>
+          <a class="placeList__btn" href="ar/image.html?place=palantay">Камера</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="mapStub__right" aria-label="Заглушка карты">
+      <div class="mapBox">
+        <div class="mapBox__title">Здесь будет карта</div>
+        <div class="mapBox__text">
+          Можно подключить карту (OpenStreetMap/Mapbox) и показывать места точками.
+          <span class="muted">[Inference]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =======================
+  5) О проекте / Источники
+  ВАЖНО:
+  - Источники должны быть реальными. Я их не знаю → ставлю заглушки.
+  - Когда дашь ссылки/книги — заменим и уберём [Unverified]
+======================= -->
+<section class="panel" id="about">
+  <div class="sectionHead">
+    <h2 class="section__title">О проекте и источники</h2>
+    <p class="section__text">
+      Коротко: зачем это сделано и откуда берутся исторические справки.
+    </p>
+  </div>
+
+  <div class="aboutGrid">
+    <div class="aboutCard">
+      <div class="aboutCard__title">О проекте</div>
+      <p class="aboutCard__text">
+        Это AR-проект: пользователь наводит камеру на метку (QR/изображение/здание) и смотрит видео,
+        привязанное к объекту.
+      </p>
+      <p class="aboutCard__text muted">
+        [Unverified] Здесь можно добавить автора, город, цель проекта, партнеров.
+      </p>
+    </div>
+
+    <div class="aboutCard">
+      <div class="aboutCard__title">Источники</div>
+      <ul class="aboutCard__list">
+        <li class="muted">[Unverified] Источник 1: ссылка/книга/архив</li>
+        <li class="muted">[Unverified] Источник 2: ссылка/музей/сайт</li>
+        <li class="muted">[Unverified] Источник 3: статья/краеведческий портал</li>
+      </ul>
+      <div class="aboutCard__note muted">
+        Важно: если текст на карточках переписывается — лучше хранить ссылки на первоисточники.
+        <span class="muted">[Inference]</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =======================
+  6) Footer (подвал продукта)
+======================= -->
+<footer class="footer" id="footer">
+  <div class="footer__inner">
+    <div class="footer__left">
+      <div class="footer__brand">
+        <span class="footer__logo" aria-hidden="true"></span>
+        <span class="footer__name">AR Видео-Метки</span>
+        <span class="footer__ver">v0.1</span>
+      </div>
+      <div class="footer__meta muted">
+        © <span id="year"></span> • Прототип продукта • Камера используется только внутри AR-режима. <span class="muted">[Unverified]</span>
+      </div>
+    </div>
+
+    <div class="footer__right">
+      <!-- Эти ссылки ты позже заменишь на реальные страницы -->
+      <a class="footer__link" href="#about">О проекте</a>
+      <a class="footer__link" href="#faq">FAQ</a>
+      <a class="footer__link" href="#support">Поддержка</a>
+      <a class="footer__link" href="#hero">Наверх</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Маленький скрипт только для года в футере
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 
   </main>
 
@@ -302,6 +559,7 @@
   <script src="header.js"></script>
 </body>
 </html>
+
 
 
 
