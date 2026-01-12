@@ -1,0 +1,60 @@
+<!-- =========================================================
+  ФАЙЛ: ar/camera.html
+  Назначение:
+  - Открывает камеру (getUserMedia)
+  - UI поверх камеры в твоём стиле
+========================================================== -->
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AR — Камера</title>
+  <link rel="stylesheet" href="camera.css" />
+</head>
+
+<body>
+  <div class="arRoot">
+
+    <!-- Видеопоток камеры -->
+    <video id="camera" class="camera" autoplay playsinline muted></video>
+
+    <!-- UI поверх -->
+    <div class="ui">
+
+      <!-- Верх -->
+      <div class="topBar">
+        <a class="pillBtn" href="../index.html" aria-label="Назад на главную">← Назад</a>
+        <div class="status" id="status">Нажмите «Включить камеру»</div>
+        <button class="pillBtn" id="helpBtn" type="button">?</button>
+      </div>
+
+      <!-- Центр-подсказка -->
+      <div class="hintBox" id="hintBox">
+        <div class="hintTitle">Инструкция</div>
+        <div class="hintText">
+          1) Нажмите <b>«Включить камеру»</b><br/>
+          2) Разрешите доступ<br/>
+          3) Наведите на объект/метку<br/>
+          <span class="muted">Скоро: распознавание + видео поверх камеры.</span>
+        </div>
+      </div>
+
+      <!-- Низ -->
+      <div class="bottomBar">
+        <button class="btnPrimary" id="startBtn" type="button">Включить камеру</button>
+        <button class="btnGhost" id="stopBtn" type="button" disabled>Остановить</button>
+      </div>
+
+      <!-- Ошибки -->
+      <div class="errorBox" id="errorBox" hidden>
+        <div class="errorTitle">Камера не запустилась</div>
+        <div class="errorText" id="errorText"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="camera.js"></script>
+</body>
+</html>
