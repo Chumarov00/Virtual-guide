@@ -455,3 +455,289 @@ a{ color: inherit; text-decoration: none; }
     height: 190px; /* Чуть больше фото на телефоне */
   }
 }
+
+/* =========================================================
+  ДОБАВЬ ЭТО В КОНЕЦ styles.css
+  Стили для 6 финальных блоков
+========================================================= */
+
+/* ===== FAQ ===== */
+.faq{ display: grid; gap: 10px; }
+
+.faqItem{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 18px;
+  padding: 4px 12px;
+}
+
+.faqQ{
+  cursor: pointer;
+  padding: 12px 6px;
+  font-weight: 800;
+  color: var(--text);
+  list-style: none;
+}
+
+.faqQ::-webkit-details-marker{ display: none; }
+
+.faqA{
+  padding: 0 6px 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.faqA ul{ margin: 8px 0 0; padding-left: 18px; }
+.faqA li{ margin: 6px 0; }
+
+/* ===== Tips ===== */
+.tipsGrid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.tipCard{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.tipCard__title{
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.tipCard__text{
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ===== CTA panel ===== */
+.ctaPanel{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.ctaPanel__title{
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.ctaPanel__text{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ctaPanel__right{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ===== Map stub ===== */
+.mapStub{
+  display: grid;
+  grid-template-columns: 1fr .9fr;
+  gap: 12px;
+}
+
+.chipRow{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chip{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.chip.isActive{
+  color: var(--text);
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+}
+
+.placeList{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.placeList__item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+
+.placeList__name{
+  font-weight: 800;
+  color: var(--text);
+}
+
+.placeList__btn{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.placeList__btn:hover{ filter: brightness(1.06); }
+
+.mapBox{
+  height: 100%;
+  min-height: 220px;
+  border: 1px dashed rgba(255,255,255,.18);
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  padding: 14px;
+}
+
+.mapBox__title{
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.mapBox__text{
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ===== About / Sources ===== */
+.aboutGrid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.aboutCard{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.aboutCard__title{
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.aboutCard__text{
+  margin: 0 0 8px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.aboutCard__list{
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.aboutCard__note{
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* ===== Footer ===== */
+.footer{
+  margin-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background: linear-gradient(180deg, rgba(11,16,32,.35), rgba(11,16,32,.15));
+}
+
+.footer__inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 18px 20px;
+
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.footer__brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.footer__logo{
+  width: 26px;
+  height: 26px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 12px 30px rgba(124,92,255,.25);
+}
+
+.footer__name{ color: var(--text); }
+.footer__ver{
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+}
+
+.footer__meta{
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.footer__right{
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footer__link{
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+
+.footer__link:hover{
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.08);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px){
+  .tipsGrid{ grid-template-columns: 1fr; }
+  .mapStub{ grid-template-columns: 1fr; }
+  .aboutGrid{ grid-template-columns: 1fr; }
+  .ctaPanel{ grid-template-columns: 1fr; }
+  .ctaPanel__right{ justify-content: flex-start; }
+}
