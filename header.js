@@ -42,3 +42,20 @@
     });
   }
 })();
+// =========================================================
+// (ОПЦИОНАЛЬНО) Добавь в конец header.js
+// Чтобы "чипы" в блоке "Карта мест" переключались (визуально)
+// Сейчас это просто UI — фильтрации карточек не делаем.
+// =========================================================
+(function () {
+  const chips = document.querySelectorAll(".chipRow .chip");
+  if (!chips.length) return;
+
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      chips.forEach((c) => c.classList.remove("isActive"));
+      chip.classList.add("isActive");
+    });
+  });
+})();
+
