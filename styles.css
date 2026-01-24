@@ -1,0 +1,1106 @@
+/* =========================
+  ФАЙЛ: styles.css
+========================= */
+
+:root{
+  --bg:#0b1020;
+  --text:#e7ecff;
+  --muted:#a9b3d6;
+
+  --accent:#7c5cff;
+  --accent2:#32d1ff;
+
+  --stroke:rgba(255,255,255,.10);
+  --shadow: 0 20px 60px rgba(0,0,0,.35);
+
+  --r: 18px;
+}
+
+/* ===== БАЗА ===== */
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 10% 10%, rgba(124,92,255,.35), transparent 60%),
+    radial-gradient(800px 500px at 90% 20%, rgba(50,209,255,.25), transparent 55%),
+    radial-gradient(900px 600px at 50% 90%, rgba(124,92,255,.18), transparent 60%),
+    var(--bg);
+}
+
+a{ color: inherit; text-decoration: none; }
+
+.wrap{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px 18px 70px;
+}
+
+.panel{
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border: 1px solid var(--stroke);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  margin-top: 16px;
+}
+
+/* ===== ШАПКА ===== */
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(11,16,32,.82), rgba(11,16,32,.55));
+  border-bottom: 1px solid var(--stroke);
+}
+
+.topbar__inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 18px;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 750;
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+
+.brand__logo{
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 12px 30px rgba(124,92,255,.35);
+  flex: 0 0 auto;
+}
+
+.brand__text{ font-size: 15px; }
+
+.brand__badge{
+  font-size: 11px;
+  color: var(--muted);
+  padding: 4px 8px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+}
+
+.nav{
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nav__link{
+  color: var(--muted);
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: transform .12s ease, background .12s ease, color .12s ease, border-color .12s ease;
+  white-space: nowrap;
+}
+
+.nav__link:hover{
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.08);
+  transform: translateY(-1px);
+}
+
+.actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  font-weight: 650;
+  font-size: 14px;
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  transition: transform .12s ease, filter .12s ease;
+  white-space: nowrap;
+}
+
+.btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.btn--primary{
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 18px 40px rgba(124,92,255,.25);
+}
+
+.btn--ghost{ background: rgba(255,255,255,.04); }
+
+.iconbtn{
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .12s ease, filter .12s ease;
+}
+
+.iconbtn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.burger{
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px;
+}
+
+.burger span{
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: rgba(231,236,255,.85);
+  border-radius: 99px;
+}
+
+.drawer{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 18px 14px;
+}
+
+.drawer__link{
+  display: block;
+  padding: 12px 12px;
+  margin-top: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+}
+
+.drawer__link:hover{ filter: brightness(1.06); }
+
+.drawer__actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+@media (max-width: 920px){
+  .topbar__inner{ grid-template-columns: auto 1fr auto; }
+  .nav{ display: none; }
+  .actions{ display: none; }
+  .burger{ display: flex; }
+}
+
+/* ===== HERO ===== */
+.hero__title{
+  margin: 0 0 8px;
+  font-size: 40px;
+  line-height: 1.05;
+}
+
+.hero__text{
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.hero__actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== ИНСТРУКЦИЯ ===== */
+.instruction__head{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.instruction__title{
+  margin: 0;
+  font-size: 20px;
+}
+
+.instruction__subtitle{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.steps{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.step{
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  align-items: start;
+
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+}
+
+.step__num{
+  width: 36px;
+  height: 36px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.step__label{
+  font-weight: 750;
+  margin-bottom: 3px;
+}
+
+.step__text{
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.muted{ color: var(--muted); }
+
+.hint{
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+}
+
+.hint__dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent2);
+  box-shadow: 0 0 22px rgba(50,209,255,.35);
+}
+
+.hint__text{
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* ===== Заголовки секций ===== */
+.sectionHead{ margin-bottom: 12px; }
+
+.section__title{
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+.section__text{
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* =========================================================
+  КАРТОЧКИ МЕСТ
+========================================================= */
+.placeGrid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.placeCard{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(0,0,0,.25);
+  transition: transform .12s ease, filter .12s ease;
+}
+
+.placeCard:hover{
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.placeCard__media{
+  height: 170px;
+  background: rgba(255,255,255,.04);
+}
+
+.placeCard__img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.placeCard__body{ padding: 14px; }
+
+.placeCard__tag{
+  display: inline-flex;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  color: var(--muted);
+}
+
+.placeCard__title{
+  margin: 10px 0 6px;
+  font-weight: 850;
+  font-size: 16px;
+}
+
+.placeCard__desc{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 14px;
+  min-height: 64px;
+}
+
+.placeCard__actions{
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* Планшет: 2 колонки */
+@media (max-width: 1000px){
+  .placeGrid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== Телефон: РУЛЕТКА (свайп) ===== */
+@media (max-width: 700px){
+  .placeGrid{
+    display: flex;
+    gap: 12px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    scroll-snap-type: x mandatory;
+
+    padding: 2px 6px 10px;
+    margin: 0 -6px;
+  }
+
+  .placeCard{
+    flex: 0 0 85%;
+    max-width: 420px;
+    scroll-snap-align: start;
+  }
+
+  .placeCard__media{ height: 200px; }
+
+  .placeGrid::-webkit-scrollbar{ height: 0; }
+  .placeGrid{ scrollbar-width: none; }
+}
+
+/* Очень маленькие телефоны */
+@media (max-width: 420px){
+  .placeCard{ flex-basis: 92%; }
+}
+
+/* ===== swipeHint ===== */
+.swipeHint{
+  margin-top: 10px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+}
+
+.swipeHint__dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent2);
+  box-shadow: 0 0 22px rgba(50,209,255,.35);
+}
+
+.swipeHint__text{
+  color: var(--muted);
+  font-weight: 700;
+}
+
+@media (max-width: 700px){
+  .swipeHint{ display: flex; }
+}
+
+/* =========================================================
+  СТИЛИ 6 БЛОКОВ В КОНЦЕ (FAQ, quality, CTA, map, about, footer)
+  Если у тебя они уже стоят в HTML — эти стили нужны.
+========================================================= */
+
+/* FAQ */
+.faq{ display: grid; gap: 10px; }
+
+.faqItem{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 18px;
+  padding: 4px 12px;
+}
+
+.faqQ{
+  cursor: pointer;
+  padding: 12px 6px;
+  font-weight: 800;
+  color: var(--text);
+  list-style: none;
+}
+.faqQ::-webkit-details-marker{ display: none; }
+
+.faqA{
+  padding: 0 6px 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.faqA ul{ margin: 8px 0 0; padding-left: 18px; }
+.faqA li{ margin: 6px 0; }
+
+/* quality tips */
+.tipsGrid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.tipCard{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 18px;
+  padding: 14px;
+}
+.tipCard__title{ font-weight: 900; margin-bottom: 6px; }
+.tipCard__text{ color: var(--muted); line-height: 1.5; }
+
+/* CTA */
+.ctaPanel{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+.ctaPanel__title{ margin: 0 0 6px; font-size: 20px; }
+.ctaPanel__text{ margin: 0; color: var(--muted); line-height: 1.5; }
+.ctaPanel__right{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* map stub */
+.mapStub{
+  display: grid;
+  grid-template-columns: 1fr .9fr;
+  gap: 12px;
+}
+.chipRow{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.chip{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.chip.isActive{
+  color: var(--text);
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+}
+.placeList{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.placeList__item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+.placeList__name{ font-weight: 800; color: var(--text); }
+.placeList__btn{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.placeList__btn:hover{ filter: brightness(1.06); }
+
+.mapBox{
+  height: 100%;
+  min-height: 220px;
+  border: 1px dashed rgba(255,255,255,.18);
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  padding: 14px;
+}
+.mapBox__title{ font-weight: 900; margin-bottom: 6px; }
+.mapBox__text{ color: var(--muted); line-height: 1.5; }
+
+/* about */
+.aboutGrid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.aboutCard{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.45);
+  border-radius: 18px;
+  padding: 14px;
+}
+.aboutCard__title{ font-weight: 900; margin-bottom: 6px; }
+.aboutCard__text{ margin: 0 0 8px; color: var(--muted); line-height: 1.55; }
+.aboutCard__list{ margin: 8px 0 0; padding-left: 18px; color: var(--muted); }
+.aboutCard__note{ margin-top: 10px; color: var(--muted); line-height: 1.45; }
+
+/* footer */
+.footer{
+  margin-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background: linear-gradient(180deg, rgba(11,16,32,.35), rgba(11,16,32,.15));
+}
+.footer__inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 18px 20px;
+
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.footer__brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+.footer__logo{
+  width: 26px;
+  height: 26px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 12px 30px rgba(124,92,255,.25);
+}
+.footer__name{ color: var(--text); }
+.footer__ver{
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+}
+.footer__meta{
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.footer__right{
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.footer__link{
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+.footer__link:hover{
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.08);
+}
+
+@media (max-width: 900px){
+  .tipsGrid{ grid-template-columns: 1fr; }
+  .mapStub{ grid-template-columns: 1fr; }
+  .aboutGrid{ grid-template-columns: 1fr; }
+  .ctaPanel{ grid-template-columns: 1fr; }
+  .ctaPanel__right{ justify-content: flex-start; }
+}
+/* =========================================================
+  [НОВЫЙ БЛОК] "В разработке" — секция comingSoon
+  Добавь в КОНЕЦ styles.css
+========================================================= */
+
+.comingSoon{
+  /* Делаем “как карточка в карточке” */
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 220px at 10% 30%, rgba(124,92,255,.22), transparent 55%),
+    radial-gradient(700px 220px at 90% 60%, rgba(50,209,255,.18), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 12px;
+  align-items: stretch;
+
+  padding: 18px;
+}
+
+.comingSoon__content{
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.40);
+  padding: 16px;
+  box-shadow: 0 18px 46px rgba(0,0,0,.20);
+}
+
+.comingSoon__badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.comingSoon__title{
+  margin: 10px 0 6px;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.comingSoon__text{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 58ch;
+}
+
+.comingSoon__actions{
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Декор-область справа */
+.comingSoon__art{
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  overflow: hidden;
+}
+
+/* “Сферы” как лёгкий визуальный акцент */
+.comingSoon__orb{
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(0px);
+  opacity: .9;
+}
+
+.comingSoon__orb--1{
+  width: 220px;
+  height: 220px;
+  left: -60px;
+  top: 10px;
+  background: radial-gradient(circle at 30% 30%, rgba(124,92,255,.65), rgba(124,92,255,.05));
+  box-shadow: 0 30px 80px rgba(124,92,255,.18);
+}
+
+.comingSoon__orb--2{
+  width: 260px;
+  height: 260px;
+  right: -90px;
+  bottom: -120px;
+  background: radial-gradient(circle at 30% 30%, rgba(50,209,255,.55), rgba(50,209,255,.05));
+  box-shadow: 0 30px 80px rgba(50,209,255,.14);
+}
+
+/* Адаптив: на телефоне всё в столбик */
+@media (max-width: 800px){
+  .comingSoon{
+    grid-template-columns: 1fr;
+  }
+  .comingSoon__art{
+    min-height: 160px;
+  }
+}
+
+/* =========================================================
+  [НОВЫЙ БЛОК] "Скоро появится" — секция soon
+========================================================= */
+
+/* Верх секции: заголовок + бейдж */
+.soonHead{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  margin-bottom: 12px;
+}
+
+.soonHead__title{
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.soonHead__text{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Бейдж "В разработке" справа */
+.soonBadge{
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Сетка карточек */
+.soonGrid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Карточка */
+.soonCard{
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,26,51,.40);
+  box-shadow: 0 14px 34px rgba(0,0,0,.22);
+
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Внутренний “мягкий” свет как на макете */
+.soonCard::before{
+  content: "";
+  position: absolute;
+  inset: -80px -80px auto auto;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, rgba(50,209,255,.22), transparent 60%);
+  pointer-events: none;
+}
+
+/* Верхняя строка: "Скоро" слева и справа */
+.soonCard__top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Пилюля слева */
+.soonPill{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 12px;
+}
+
+/* Маленькая подпись справа */
+.soonMini{
+  color: rgba(169,179,214,.85);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+/* Заголовок карточки */
+.soonCard__title{
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 950;
+  position: relative;
+  z-index: 1;
+}
+
+/* Описание карточки */
+.soonCard__desc{
+  margin: 0 0 10px;
+  color: var(--muted);
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+/* Статус "В разработке" */
+.soonCard__status{
+  color: rgba(169,179,214,.95);
+  font-weight: 900;
+  font-size: 12px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Кнопка "Недоступно" */
+.soonCard__btn{
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: rgba(231,236,255,.75);
+
+  padding: 12px 14px;
+  font-weight: 950;
+  cursor: not-allowed;
+
+  position: relative;
+  z-index: 1;
+}
+
+/* Чуть “задизейблим” карточку целиком */
+.soonCard[aria-disabled="true"]{
+  filter: saturate(.9);
+  opacity: .95;
+}
+
+/* Адаптив: на телефоне — одна колонка */
+@media (max-width: 900px){
+  .soonGrid{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+  [ПОДДЕРЖКА] CTA-плашка "Оставайтесь на связи"
+========================================================= */
+
+.supportCta{
+  margin-top: 12px;
+
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.10);
+
+  /* “кремовая” подложка, чтобы было как на примере */
+  background:
+    radial-gradient(900px 260px at 10% 50%, rgba(255,255,255,.20), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+
+  padding: 14px 16px;
+
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.supportCta__title{
+  font-weight: 950;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.supportCta__text{
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.supportCta__right{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Кнопки внутри supportCta — отдельный стиль, чтобы выглядели как на скрине */
+.supportBtn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 14px;
+
+  border: 1px solid rgba(255,255,255,.12);
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition: transform .12s ease, filter .12s ease;
+}
+
+.supportBtn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+/* Оранжевая кнопка (как “Другие объекты” на скрине) */
+.supportBtn--primary{
+  border: none;
+  color: rgba(255,255,255,.92);
+  background: linear-gradient(135deg, #d77a2a, #c86418);
+  box-shadow: 0 18px 40px rgba(215,122,42,.22);
+}
+
+/* Светлая/нейтральная */
+.supportBtn--ghost{
+  background: rgba(255,255,255,.10);
+  color: var(--text);
+}
+
+/* Адаптив: на телефоне кнопки уходят вниз и выравниваются влево */
+@media (max-width: 800px){
+  .supportCta{
+    grid-template-columns: 1fr;
+  }
+  .supportCta__right{
+    justify-content: flex-start;
+  }
+}
+
+/* =========================================================
+   PLACE GRID = ГОРИЗОНТАЛЬНАЯ ЛЕНТА НА ВСЕХ ЭКРАНАХ
+   Цель: много карточек не делают страницу “простынёй”.
+========================================================= */
+
+.placeGrid{
+  display: flex;                       /* вместо grid делаем ленту */
+  flex-wrap: nowrap;                  /* всё в одну строку */
+  gap: 14px;                          /* расстояние между карточками */
+
+  overflow-x: auto;                   /* горизонтальная прокрутка */
+  overflow-y: visible;
+
+  padding: 6px 2px 14px;              /* отступы вокруг ленты */
+  scroll-snap-type: x mandatory;      /* “прилипание” при прокрутке */
+  scroll-padding-left: 2px;
+
+  -webkit-overflow-scrolling: touch;  /* плавно на iOS */
+  overscroll-behavior-x: contain;     /* не тянем всю страницу */
+}
+
+/* Каждая карточка — “слайд” */
+.placeCard{
+  flex: 0 0 auto;                     /* фиксируем ширину */
+  width: 360px;                       /* ширина карточки на ПК */
+  scroll-snap-align: start;           /* прилипание к началу */
+  scroll-snap-stop: always;
+}
+
+/* Адаптив: на маленьких экранах карточка шире (почти весь экран) */
+@media (max-width: 820px){
+  .placeCard{
+    width: min(86vw, 420px);
+  }
+}
+
+/* (Опционально) стиль скроллбара, чтобы было аккуратно */
+.placeGrid::-webkit-scrollbar{
+  height: 8px;
+}
+.placeGrid::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.14);
+  border-radius: 999px;
+}
+.placeGrid::-webkit-scrollbar-track{
+  background: transparent;
+}

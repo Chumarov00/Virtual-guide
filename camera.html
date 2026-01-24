@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AR — Камера</title>
+
+  <link rel="stylesheet" href="camera.css" />
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- MindAR (A-Frame build) -->
+  <!-- [Unverified] CDN/версия может меняться, но обычно работает -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+
+<body>
+  <div class="arRoot">
+
+    <!-- =========================
+      AR сцена MindAR
+      ВАЖНО: targets.mind лежит рядом => ./targets.mind
+    ========================== -->
+    <a-scene
+      id="scene"
+      class="arScene"
+      embedded
+      vr-mode-ui="enabled:false"
+      device-orientation-permission-ui="enabled:false"
+      renderer="colorManagement:true"
+      mindar-image="imageTargetSrc: ./targets.mind; uiScanning:false; uiError:false;"
+    >
+      <!-- Видео добавишь позже -->
+      <a-assets id="assets"></a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+
+      <!-- Сюда позже добавим метки/видео -->
+      <a-entity id="targetsRoot"></a-entity>
+    </a-scene>
+
+    <!-- =========================
+      UI поверх
+    ========================== -->
+    <div class="ui">
+      <div class="topBar">
+        <a class="pillBtn" href="index.html" aria-label="Назад">← Назад</a>
+
+        <div class="status" id="status">Нажмите «Включить AR»</div>
+
+        <button class="pillBtn" id="helpBtn" type="button" aria-label="Справка">?</button>
+      </div>
+
+      <div class="hintBox" id="hintBox">
+        <div class="hintTitle">Инструкция</div>
+        <div class="hintText">
+          1) Нажмите <b>«Включить AR»</b><br/>
+          2) Разрешите камеру<br/>
+          3) Наведите на метку<br/>
+          <span class="muted">Сейчас проверяем запуск. Видео добавим потом.</span>
+        </div>
+      </div>
+
+      <div class="bottomBar">
+        <button class="btnPrimary" id="startBtn" type="button">Включить AR</button>
+        <button class="btnGhost" id="stopBtn" type="button" disabled>Остановить</button>
+      </div>
+
+      <div class="errorBox" id="errorBox" hidden>
+        <div class="errorTitle">Ошибка</div>
+        <div class="errorText" id="errorText"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="camera.js"></script>
+</body>
+</html>
