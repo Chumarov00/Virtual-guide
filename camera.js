@@ -1,9 +1,9 @@
 /* =========================================================
-  ФАЙЛ: camera.js
+  camera.js
   Цель:
-  - Проверить, что targets.mind доступен
-  - Запустить MindAR строго по кнопке
-  - Дать понятные ошибки
+  - НЕ вызывать start() раньше времени (иначе dummyRun / черный экран)
+  - включать кнопку Start только когда сцена полностью loaded
+  - показывать arReady / arError
 ========================================================= */
 
 const sceneEl   = document.getElementById("scene");
@@ -17,10 +17,9 @@ const statusEl  = document.getElementById("status");
 const errorBox  = document.getElementById("errorBox");
 const errorText = document.getElementById("errorText");
 
-/* targets.mind лежит рядом с camera.html */
-const TARGETS_URL = "./targets.mind";
+let arSystem = null;      // сюда положим sceneEl.systems["mindar-image-system"]
+let isRunning = false;    // флаг “AR запущен”
 
-/* Утилиты UI */
 function setStatus(text){
   statusEl.textContent = text;
 }
@@ -34,40 +33,70 @@ function hideError(){
   errorBox.hidden = true;
 }
 
-/* Проверяем, отдаётся ли файл targets.mind по HTTP/HTTPS */
+/* Проверяем, что targets.mind реально доступен по HTTPS */
 async function checkTargetsMind(){
   try{
-    const res = await fetch(TARGETS_URL, { cache: "no-store" });
-
+    const res = await fetch("./targets.mind", { cache: "no-store" });
     if(!res.ok){
       return {
         ok: false,
         msg:
-          `Не найден targets.mind по пути: ${TARGETS_URL} (HTTP ${res.status}).\n` +
-          `Проверь, что файл лежит рядом с camera.html и загружен на GitHub Pages.`
+          `targets.mind не найден (HTTP ${res.status}).\n` +
+          `Проверь, что targets.mind лежит рядом с camera.html и доступен по ссылке:\n` +
+          `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}targets.mind`
       };
     }
-
     return { ok: true };
   }catch(e){
     return {
       ok: false,
       msg:
-        "fetch() не смог загрузить targets.mind.\n" +
-        "Чаще всего это значит:\n" +
-        "1) открыто через file:// (нужно http/https)\n" +
-        "2) файл не опубликован на GitHub Pages\n" +
-        "3) неправильный путь.\n" +
+        "Не удалось загрузить targets.mind через fetch().\n" +
+        "Проверь, что страница открыта по https (не file://) и файл реально опубликован.\n" +
         "[Inference]"
     };
   }
 }
 
-/* Запуск AR */
-async function startAR(){
-  hideError();
-  setStatus("Проверяю targets.mind…");
+/* ВАЖНО: получаем arSystem только после loaded */
+sceneEl.addEventListener("loaded", () => {
+  arSystem = sceneEl.systems["mindar-image-system"];
 
+  if(!arSystem){
+    showError("MindAR system не найден. Проверь подключение mindar-image-aframe.prod.js");
+    setStatus("Ошибка загрузки");
+    return;
+  }
+
+  // Теперь можно нажимать Start
+  startBtn.disabled = false;
+  setStatus("Нажмите «Старт AR»");
+});
+
+/* События MindAR: arReady/arError (как в примерах документации) */
+sceneEl.addEventListener("arReady", () => {
+  // AR реально поднялся, камера должна быть видна
+  setStatus("AR включён — наведи на метку");
+});
+
+sceneEl.addEventListener("arError", (e) => {
+  // Обычно это проблемы с камерой/разрешениями/устройством
+  showError("MindAR не смог запуститься (arError). Проверь разрешение камеры и браузер.");
+  setStatus("Ошибка AR");
+});
+
+/* Кнопка Start */
+startBtn.addEventListener("click", async () => {
+  hideError();
+
+  if(!arSystem){
+    showError("Сцена ещё не загрузилась. Подожди 1–2 секунды и попробуй снова.");
+    return;
+  }
+
+  if(isRunning) return;
+
+  setStatus("Проверяю targets.mind…");
   const chk = await checkTargetsMind();
   if(!chk.ok){
     showError(chk.msg);
@@ -75,67 +104,51 @@ async function startAR(){
     return;
   }
 
-  /* Система MindAR внутри A-Frame */
-  const mindarSystem = sceneEl.systems["mindar-image-system"];
-  if(!mindarSystem){
-    showError(
-      "MindAR system не найден.\n" +
-      "Проверь подключение mindar-image-aframe.prod.js"
-    );
-    setStatus("AR не запущен");
-    return;
-  }
-
   try{
     setStatus("Запуск AR…");
-    await mindarSystem.start(); /* ключевое: запуск по кнопке */
 
+    // Маленькая задержка, чтобы A-Frame успел закончить инициализацию (устраняет dummyRun)
+    await new Promise(r => requestAnimationFrame(() => r()));
+
+    await arSystem.start();  // запуск AR (камера включится здесь)
+
+    isRunning = true;
     startBtn.disabled = true;
-    stopBtn.disabled  = false;
+    stopBtn.disabled = false;
 
-    setStatus("AR включён — наведи на метку");
-  }catch(e){
-    showError(String(e));
+    // Статус “AR включён…” выставится ещё точнее в arReady
+  }catch(err){
+    showError(String(err));
     setStatus("Ошибка запуска AR");
   }
-}
+});
 
-/* Остановка AR */
-async function stopAR(){
+/* Кнопка Stop */
+stopBtn.addEventListener("click", async () => {
   hideError();
 
-  const mindarSystem = sceneEl.systems["mindar-image-system"];
-  if(mindarSystem){
-    try{
-      await mindarSystem.stop();
-    }catch(e){
-      // [Unverified] Некоторые браузеры могут ругаться при stop, но это не критично
-    }
+  if(!arSystem) return;
+
+  try{
+    await arSystem.stop();
+  }catch(e){
+    // не критично
   }
 
+  isRunning = false;
   startBtn.disabled = false;
-  stopBtn.disabled  = true;
+  stopBtn.disabled = true;
 
   setStatus("AR остановлен");
-}
+});
 
 /* Справка */
-function showHelp(){
+helpBtn.addEventListener("click", () => {
   alert(
-    "Проверка публикации:\n\n" +
-    "Открой в браузере прямую ссылку на файл:\n" +
-    "…/targets.mind\n\n" +
-    "Если скачивается/открывается — значит путь ок.\n\n" +
-    "Для GitHub Pages нужен файл .nojekyll (без .txt), чтобы не было сюрпризов."
+    "Если экран чёрный:\n" +
+    "1) Нажми «Старт AR»\n" +
+    "2) Разреши доступ к камере\n" +
+    "3) Проверь, что targets.mind открывается по ссылке:\n" +
+    location.origin + location.pathname.replace(/\/[^/]*$/, "/") + "targets.mind\n"
   );
-}
-
-/* События кнопок */
-startBtn.addEventListener("click", startAR);
-stopBtn.addEventListener("click", stopAR);
-helpBtn.addEventListener("click", showHelp);
-
-/* Стартовый статус */
-sceneEl.addEventListener("loaded", () => {
-  setStatus("Нажмите «Старт AR»");
 });
