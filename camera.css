@@ -1,0 +1,171 @@
+/* =========================================================
+  ФАЙЛ: camera.css
+  Цель:
+  - AR на весь экран
+  - UI поверх и кликабельный
+========================================================= */
+
+html, body{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* A-Frame canvas на весь экран */
+a-scene{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------------------------------------------------------
+  ВАЖНО:
+  Canvas A-Frame часто перекрывает клики.
+  Мы заставляем canvas НЕ ловить события,
+  чтобы кнопки UI работали.
+--------------------------------------------------------- */
+.a-canvas,
+.a-canvas canvas{
+  pointer-events: none !important;
+}
+
+/* Прячем встроенные UI MindAR (нам не нужны) */
+.mindar-ui,
+.mindar-ui-overlay,
+.mindar-ui-scanning,
+.mindar-ui-loading,
+.mindar-ui-error{
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* =========================================================
+  UI слой
+========================================================= */
+.ui{
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  pointer-events: none; /* весь слой не ловит, кроме кнопок */
+}
+
+/* Делаем элементы UI кликабельными */
+.topBar, .bottomBar, .pillBtn, .btnPrimary, .btnGhost, .errorBox{
+  pointer-events: auto;
+}
+
+/* Верхняя панель */
+.topBar{
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Кнопки-пилюли */
+.pillBtn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.92);
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Статус */
+.status{
+  flex: 1;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.90);
+  font-weight: 900;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Низ */
+.bottomBar{
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Основная кнопка */
+.btnPrimary{
+  border-radius: 18px;
+  padding: 12px 14px;
+  border: none;
+  color: rgba(255,255,255,0.95);
+  background: linear-gradient(135deg, #d77a2a, #c86418);
+  box-shadow: 0 20px 48px rgba(215,122,42,0.22);
+  font-weight: 950;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Вторая кнопка */
+.btnGhost{
+  border-radius: 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.90);
+  font-weight: 950;
+  font-size: 14px;
+  cursor: pointer;
+}
+.btnGhost:disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Ошибки */
+.errorBox{
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 90px;
+  margin: 0 auto;
+  max-width: 560px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,80,80,0.35);
+  background: rgba(30,0,0,0.45);
+  color: rgba(255,255,255,0.95);
+  padding: 14px;
+  box-shadow: 0 18px 46px rgba(0,0,0,0.35);
+}
+.errorTitle{
+  font-weight: 950;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.errorText{
+  font-weight: 650;
+  font-size: 13px;
+  line-height: 1.35;
+}

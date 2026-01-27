@@ -1,0 +1,452 @@
+<!-- =========================
+  ФАЙЛ: index.html
+
+  НАЗНАЧЕНИЕ:
+  Главная страница с карточками мест и переходом на camera.html
+
+  ВАЖНО (чтобы не ломалось на GitHub Pages):
+  - В src лучше использовать / (слэш), а не \ (обратный слэш).
+    Пример: "Фото карточек домов/merchant Naumov's house.jpg"
+  - Пробелы в именах файлов лучше заменить на _ или %20
+========================= -->
+<!doctype html>
+<html lang="ru">
+<head>
+  <!-- =========================================================
+    [BLOCK 01] HEAD
+    - Метаданные
+    - Заголовок вкладки
+    - Подключение стилей styles.css
+  ========================================================= -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR Видео-Метки</title>
+  <meta name="description" content="Наведи камеру на QR/изображение/здание — смотри видео поверх реальности." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- =========================================================
+    [BLOCK 02] HEADER / TOPBAR
+    Что делает:
+    - Логотип/название
+    - Меню (ПК)
+    - Кнопки (ПК)
+    - Бургер и drawer (телефон)
+  ========================================================= -->
+  <header class="topbar">
+    <div class="topbar__inner">
+
+      <!-- [BLOCK 02.1] BRAND -->
+      <a class="brand" href="index.html" aria-label="На главную">
+        <span class="brand__logo" aria-hidden="true"></span>
+        <span class="brand__text">AR Видео-Метки</span>
+        <span class="brand__badge" title="Версия">Beta</span>
+      </a>
+
+      <!-- [BLOCK 02.2] NAV (ПК) -->
+      <nav class="nav" aria-label="Основная навигация">
+        <a class="nav__link" href="#demo">Демо</a>
+        <a class="nav__link" href="#how">Как работает</a>
+        <a class="nav__link" href="projects.html">Проекты</a>
+        <a class="nav__link" href="#support">Поддержка</a>
+      </nav>
+
+      <!-- [BLOCK 02.3] ACTIONS (ПК) -->
+      <div class="actions">
+        <a class="btn btn--ghost" href="#demo">Открыть демо</a>
+        <a class="btn btn--primary" href="camera.html">Запустить камеру</a>
+        <button class="iconbtn" type="button" aria-label="Справка" id="helpBtn">?</button>
+      </div>
+
+      <!-- [BLOCK 02.4] BURGER (телефон) -->
+      <button class="burger" type="button" aria-label="Открыть меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- [BLOCK 02.5] DRAWER (мобильное меню) -->
+    <div class="drawer" hidden>
+      <a class="drawer__link" href="#demo">Демо</a>
+      <a class="drawer__link" href="#how">Как работает</a>
+      <a class="drawer__link" href="projects.html">Проекты</a>
+      <a class="drawer__link" href="#support">Поддержка</a>
+
+      <div class="drawer__actions">
+        <a class="btn btn--ghost" href="#demo">Открыть демо</a>
+        <a class="btn btn--primary" href="camera.html">Запустить камеру</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+    [BLOCK 03] MAIN / WRAP
+    Тут весь контент страницы (секции panel)
+  ========================================================= -->
+  <main class="wrap">
+
+    <!-- =========================================================
+      [BLOCK 03.1] HERO
+    ========================================================= -->
+    <section class="panel hero" id="hero">
+      <h1 class="hero__title">AR прогулка по Йошкар-Оле</h1>
+      <p class="hero__text">
+        Сканируйте городские объекты и смотрите ожившие истории в дополненной реальности.
+      </p>
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="camera.html">Запустить камеру</a>
+        <a class="btn btn--ghost" href="#how">Инструкция</a>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      [BLOCK 03.2] INSTRUCTION (как пользоваться)
+    ========================================================= -->
+    <section class="panel instruction" id="how">
+      <div class="instruction__head">
+        <h2 class="instruction__title">Как смотреть AR-видео</h2>
+        <p class="instruction__subtitle">
+          Выберите объект внизу или просто нажмите <b>«Запустить камеру»</b>.
+        </p>
+      </div>
+
+      <ol class="steps" aria-label="Инструкция в 4 шага">
+        <li class="step">
+          <span class="step__num">1</span>
+          <div class="step__body">
+            <div class="step__label">Выберите объект</div>
+            <div class="step__text">
+              Внизу страницы выберите метку из списка <span class="muted">или</span> нажмите <b>«Запустить камеру»</b>.
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step__num">2</span>
+          <div class="step__body">
+            <div class="step__label">Разрешите камеру</div>
+            <div class="step__text">
+              Браузер спросит доступ — это нужно для работы.
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step__num">3</span>
+          <div class="step__body">
+            <div class="step__label">Наведите на объект</div>
+            <div class="step__text">
+              Наведите камеру на QR / изображение / фасад. Держите в кадре 1–2 секунды.
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step__num">4</span>
+          <div class="step__body">
+            <div class="step__label">Смотрите</div>
+            <div class="step__text">
+              Если видео не стартовало — нажмите <b>Play</b>.
+              <span class="muted">Наслаждайтесь тенями прошлого.</span>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <div class="hint">
+        <span class="hint__dot" aria-hidden="true"></span>
+        <span class="hint__text">Совет: избегайте бликов и слишком тёмных сцен — так стабильнее.</span>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      [BLOCK 03.3] PLACES (лента карточек)
+      Что поменялось:
+      - добавил обёртку .placeRail (для стрелки на телефоне)
+      - сама лента остаётся .placeGrid
+    ========================================================= -->
+    <section class="panel" id="places">
+      <div class="sectionHead">
+        <h2 class="section__title">Исторические места</h2>
+        <p class="section__text">Выберите место и нажмите «Запустить камеру», затем наведите на объект.</p>
+      </div>
+
+      <!-- [BLOCK 03.3.1] placeRail — обёртка для стрелки -->
+      <div class="placeRail">
+        <!-- [BLOCK 03.3.2] placeGrid — лента карточек -->
+        <div class="placeGrid">
+
+          <!-- ====== CARD 01: Наумов ====== -->
+          <article class="placeCard">
+            <div class="placeCard__media">
+              <img
+                class="placeCard__img"
+                src="Фото карточек домов\merchant Naumov's house.jpg"
+                alt="Дом купца Наумова"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="placeCard__body">
+              <div class="placeCard__tag">Архитектура</div>
+              <h3 class="placeCard__title">Дом купца Наумова</h3>
+              <p class="placeCard__desc">
+                Первый этаж дома купца Наумова каменный, второй — деревянный, украшен резьбой.
+                Это классический купеческий дом: на первом этаже была торговая лавка, на втором — жилые помещения.
+              </p>
+
+              <div class="placeCard__actions">
+                <a class="btn btn--primary" href="camera.html?place=naumov">Запустить камеру</a>
+                <a class="btn btn--ghost" href="#how">Инструкция</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- ====== CARD 02: Булыгин ====== -->
+          <article class="placeCard">
+            <div class="placeCard__media">
+              <img
+                class="placeCard__img"
+                src="Фото карточек домов\house  merchant Bulygin.jpg"
+                alt="Дом купца Булыгина"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="placeCard__body">
+              <div class="placeCard__tag">Архитектура</div>
+              <h3 class="placeCard__title">Дом купца Булыгина</h3>
+              <p class="placeCard__desc">
+                Дом купца Булыгина — это исторический особняк в Йошкар-Оле, построенный в 1835 году купцом М.М. Таланцевым,
+                который в настоящее время является частью Музея истории города Йошкар-Олы.
+              </p>
+
+              <div class="placeCard__actions">
+                <a class="btn btn--primary" href="camera.html?place=naumov">Запустить камеру</a>
+                <a class="btn btn--ghost" href="#how">Инструкция</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- ====== CARD 03: Пчелин ====== -->
+          <article class="placeCard">
+            <div class="placeCard__media">
+              <img
+                class="placeCard__img"
+                src="Фото карточек домов\Merchant Pchelin's House.jpg"
+                alt="Дом купца Пчелина"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="placeCard__body">
+              <div class="placeCard__tag">Архитектура</div>
+              <h3 class="placeCard__title">Дом купца Пчелина</h3>
+              <p class="placeCard__desc">
+                Дом купца Пчелина расположен в исторической части Йошкар-Олы и является
+                одним из старейших каменных зданий города, построенным в XVIII веке.
+              </p>
+
+              <div class="placeCard__actions">
+                <a class="btn btn--primary" href="camera.html?place=naumov">Запустить камеру</a>
+                <a class="btn btn--ghost" href="#how">Инструкция</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- ====== CARD 04: Чулков ====== -->
+          <article class="placeCard">
+            <div class="placeCard__media">
+              <img
+                class="placeCard__img"
+                src="Фото карточек домов\Chulkov's house.jpg"
+                alt="Усадьба Чулкова"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="placeCard__body">
+              <div class="placeCard__tag">Музей</div>
+              <h3 class="placeCard__title">Усадьба Чулкова</h3>
+              <p class="placeCard__desc">
+                Усадьба Чулкова — дом в стиле модерн из красного кирпича с узорной кладкой.
+                С 1996 года здесь находится музей истории города.
+              </p>
+
+              <div class="placeCard__actions">
+                <a class="btn btn--primary" href="camera.html?place=chulkov">Запустить камеру</a>
+                <a class="btn btn--ghost" href="#how">Инструкция</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- ====== CARD 05: Палантай ====== -->
+          <article class="placeCard">
+            <div class="placeCard__media">
+              <img
+                class="placeCard__img"
+                src="Фото карточек домов\I.S. Palantai Music College.jpg"
+                alt="Музыкальное училище имени И. С. Палантая"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="placeCard__body">
+              <div class="placeCard__tag">Культура</div>
+              <h3 class="placeCard__title">Музыкальное училище им. И. С. Палантая</h3>
+              <p class="placeCard__desc">
+                [Unverified] Пришли текст для этой карточки — я вставлю точное описание без домыслов.
+              </p>
+
+              <div class="placeCard__actions">
+                <a class="btn btn--primary" href="camera.html?place=palantay">Запустить камеру</a>
+                <a class="btn btn--ghost" href="#how">Инструкция</a>
+              </div>
+            </div>
+          </article>
+
+        </div><!-- /.placeGrid -->
+      </div><!-- /.placeRail -->
+
+      <!-- =========================================================
+        [BLOCK 03.3.3] swipeHint (ТЕКСТОВАЯ ПОДСКАЗКА)
+        Сейчас ЗАКОММЕНТИРОВАНО, чтобы можно было вернуть позже.
+
+        Чтобы включить обратно:
+        1) Убрать комментарии вокруг этого блока
+        2) В styles.css убедиться что .swipeHint display включается на телефоне
+      ========================================================= -->
+      <!--
+      <div class="swipeHint" aria-hidden="true">
+        <span class="swipeHint__dot"></span>
+        <span class="swipeHint__text">Листай места свайпом →</span>
+      </div>
+      -->
+    </section>
+
+    <!-- =========================================================
+      [BLOCK 03.4] SOON (скоро появится)
+    ========================================================= -->
+    <section class="panel" id="soon">
+      <div class="soonHead">
+        <div class="soonHead__left">
+          <h2 class="soonHead__title">Скоро появится</h2>
+          <!--<p class="soonHead__text">
+            Эти точки готовятся. В тестовой версии остаётся текущий набор.
+          </p>-->
+        </div>
+
+        <div class="soonHead__right">
+          <span class="soonBadge">В разработке</span>
+        </div>
+      </div>
+
+      <div class="soonGrid">
+        <article class="soonCard" aria-disabled="true">
+          <div class="soonCard__top">
+            <span class="soonPill">Скоро</span>
+            <!--<span class="soonMini">Скоро</span>-->  
+          </div>
+          <h3 class="soonCard__title">Вокзальная терраса</h3>
+          <p class="soonCard__desc">
+            Будущая точка с историей городских пересадочных узлов.
+          </p>
+          <div class="soonCard__status">В разработке</div>
+          <button class="soonCard__btn" type="button" disabled>В разработке</button>
+        </article>
+
+        <article class="soonCard" aria-disabled="true">
+          <div class="soonCard__top">
+            <span class="soonPill">Скоро</span>
+            <!--<span class="soonMini">Скоро</span>-->  
+          </div>
+          <h3 class="soonCard__title">Садовая галерея</h3>
+          <p class="soonCard__desc">
+            Локация о прогулочных зонах и первых городских садах.
+          </p>
+          <div class="soonCard__status">В разработке</div>
+          <button class="soonCard__btn" type="button" disabled>В разработке</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      [BLOCK 03.5] COMING SOON (в разработке)
+    ========================================================= -->
+    <section class="panel" id="comingSoon">
+      <div class="comingSoon">
+        <div class="comingSoon__content">
+          <div class="comingSoon__badge">В разработке</div>
+          <h2 class="comingSoon__title">Готовятся новые маршруты</h2>
+          <p class="comingSoon__text">
+            Скоро добавим новые точки, более длинные AR-истории и партнёрские форматы.
+          </p>
+
+          <div class="comingSoon__actions">
+            <a class="btn btn--primary" href="projects.html">Смотреть планы</a>
+            <a class="btn btn--ghost" href="#places">Открыть объекты</a>
+          </div>
+        </div>
+
+        <div class="comingSoon__art" aria-hidden="true">
+          <div class="comingSoon__orb comingSoon__orb--1"></div>
+          <div class="comingSoon__orb comingSoon__orb--2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      [BLOCK 03.6] SUPPORT (поддержка)
+    ========================================================= -->
+    <section class="panel" id="support">
+      <h2 class="section__title">Поддержка</h2>
+      <p class="section__text">
+        Если не видит объект: приблизьтесь, добавьте света, уберите блики, удерживайте в кадре.
+      </p>
+
+      <div class="supportCta">
+        <div class="supportCta__left">
+          <div class="supportCta__title">Оставайтесь на связи</div>
+          <div class="supportCta__text">
+            Мы расскажем о новых релизах и попросим короткую обратную связь.
+          </div>
+        </div>
+
+        <div class="supportCta__right">
+          <a class="supportBtn supportBtn--primary" href="#places">Другие объекты</a>
+          <a class="supportBtn supportBtn--ghost" href="mailto:yourmail@example.com?subject=AR%20Видео-Метки%20—%20отзыв">
+            Оставить отзыв
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      [BLOCK 03.7] CTA (призыв к действию)
+    ========================================================= -->
+    <section class="panel ctaPanel" id="next">
+      <div class="ctaPanel__left">
+        <h2 class="ctaPanel__title">Готовы попробовать?</h2>
+        <p class="ctaPanel__text">
+          Нажмите «Запустить камеру» и наведите на объект.
+          Или пролистайте к карточкам и выберите место.
+        </p>
+      </div>
+
+      <div class="ctaPanel__right">
+        <a class="btn btn--primary" href="camera.html">Запустить камеру</a>
+        <a class="btn btn--ghost" href="#places">Выбрать место</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================
+    [BLOCK 04] SCRIPTS
+    header.js отвечает за бургер-меню и кнопку help (если логика там есть)
+  ========================================================= -->
+  <script src="header.js"></script>
+</body>
+</html>
