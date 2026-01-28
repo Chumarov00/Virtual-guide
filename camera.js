@@ -1,154 +1,169 @@
 /* =========================================================
   camera.js
-  Цель:
-  - НЕ вызывать start() раньше времени (иначе dummyRun / черный экран)
-  - включать кнопку Start только когда сцена полностью loaded
-  - показывать arReady / arError
+  Задача:
+  1) Создать якоря (targetIndex 0..24)
+  2) На targetFound выбрать нужный ролик
+  3) Показать видео в маленьком окне
+  4) На targetLost НЕ останавливать видео
 ========================================================= */
 
-const sceneEl   = document.getElementById("scene");
+/* -----------------------------
+  [БЛОК A] DOM ссылки
+------------------------------ */
+const sceneEl     = document.getElementById("scene");
+const anchorsRoot = document.getElementById("anchors");
 
-const startBtn  = document.getElementById("startBtn");
-const stopBtn   = document.getElementById("stopBtn");
-const helpBtn   = document.getElementById("helpBtn");
+const statusEl    = document.getElementById("status");
+const panelEl     = document.getElementById("videoPanel");
+const titleEl     = document.getElementById("videoTitle");
+const hintEl      = document.getElementById("videoHint");
+const videoEl     = document.getElementById("arVideo");
 
-const statusEl  = document.getElementById("status");
+/* -----------------------------
+  [БЛОК B] Настройка источников
+  ВАЖНО: тут ты будешь менять пути.
+  Лучший вариант:
+  - положить mp4 рядом в репо (или в /videos/)
+  - указать относительные пути
+------------------------------ */
+const VIDEO_SOURCES = {
+  bulygin: "./videos/Bulygin's House.mp4",   // <-- поменяй путь под себя
+  naumov:  "./videos/Naumov's house.mp4",    // <-- поменяй путь под себя
+  pchelin: "./videos/Pchelin's House.MP4"   // <-- поменяй путь под себя
+};
 
-const errorBox  = document.getElementById("errorBox");
-const errorText = document.getElementById("errorText");
+/* -----------------------------
+  [БЛОК C] Правило: index -> группа видео
+  По твоему ТЗ:
+  0..7   -> bulygin
+  8..14  -> naumov
+  15..24 -> pchelin
+------------------------------ */
+function groupByTargetIndex(i){
+  if (i >= 0 && i <= 7)   return "bulygin";
+  if (i >= 8 && i <= 14)  return "naumov";
+  if (i >= 15 && i <= 24) return "pchelin";
+  return null;
+}
 
-let arSystem = null;      // сюда положим sceneEl.systems["mindar-image-system"]
-let isRunning = false;    // флаг “AR запущен”
+/* -----------------------------
+  [БЛОК D] Текущее состояние
+------------------------------ */
+let currentGroup = null;   // какая группа сейчас играет
+let currentIndex = null;   // какой targetIndex последний нашли
 
+/* -----------------------------
+  [БЛОК E] Утилиты UI
+------------------------------ */
 function setStatus(text){
   statusEl.textContent = text;
 }
 
-function showError(text){
-  errorText.textContent = text;
-  errorBox.hidden = false;
+function showPanel(){
+  panelEl.hidden = false;
 }
 
-function hideError(){
-  errorBox.hidden = true;
+function setPanelText(group, index, found){
+  // Заголовок
+  titleEl.textContent = `Видео: ${group} (метка #${index})`;
+
+  // Подсказка справа
+  hintEl.textContent = found ? "Метка найдена" : "Метка потеряна (видео продолжает идти)";
 }
 
-/* Проверяем, что targets.mind реально доступен по HTTPS */
-async function checkTargetsMind(){
+/* -----------------------------
+  [БЛОК F] Включение видео
+  - Если та же группа: не перезапускаем
+  - Если другая группа: меняем src и стартуем
+------------------------------ */
+async function playGroup(group, index){
+  const src = VIDEO_SOURCES[group];
+
+  if (!src){
+    setStatus(`Нет источника для группы: ${group}`);
+    return;
+  }
+
+  // Если уже играет нужная группа — ничего не делаем
+  if (currentGroup === group && !videoEl.paused){
+    currentIndex = index;
+    setPanelText(group, index, true);
+    showPanel();
+    setStatus(`Метка #${index} → продолжаю это же видео`);
+    return;
+  }
+
+  currentGroup = group;
+  currentIndex = index;
+
+  // Меняем источник
+  videoEl.src = src;
+
+  // Показываем панель
+  setPanelText(group, index, true);
+  showPanel();
+  setStatus(`Метка #${index} → загружаю видео…`);
+
   try{
-    const res = await fetch("./targets.mind", { cache: "no-store" });
-    if(!res.ok){
-      return {
-        ok: false,
-        msg:
-          `targets.mind не найден (HTTP ${res.status}).\n` +
-          `Проверь, что targets.mind лежит рядом с camera.html и доступен по ссылке:\n` +
-          `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}targets.mind`
-      };
-    }
-    return { ok: true };
+    // Пытаемся запустить
+    await videoEl.play();
+    setStatus(`Видео играет (метка #${index})`);
   }catch(e){
-    return {
-      ok: false,
-      msg:
-        "Не удалось загрузить targets.mind через fetch().\n" +
-        "Проверь, что страница открыта по https (не file://) и файл реально опубликован.\n" +
-        "[Inference]"
-    };
+    // Автовоспроизведение может блокироваться политиками браузера [Unverified]
+    setStatus("Видео готово. Нажми Play в плеере.");
   }
 }
 
-/* ВАЖНО: получаем arSystem только после loaded */
+/* -----------------------------
+  [БЛОК G] Создаём anchors 0..24
+  Эти entity нужны для событий targetFound/targetLost
+------------------------------ */
+function buildAnchors(){
+  for(let i = 0; i <= 24; i++){
+    const a = document.createElement("a-entity");
+    a.setAttribute("mindar-image-target", `targetIndex: ${i}`);
+
+    // Сохраним индекс в dataset для удобства
+    a.dataset.index = String(i);
+
+    // Событие: метка найдена
+    a.addEventListener("targetFound", async () => {
+      const idx = Number(a.dataset.index);
+      const group = groupByTargetIndex(idx);
+
+      if (!group){
+        setStatus(`Нашёл метку #${idx}, но нет правила для видео`);
+        return;
+      }
+
+      await playGroup(group, idx);
+    });
+
+    // Событие: метка потеряна
+    // ВАЖНО: НЕ прячем панель и НЕ ставим pause()
+    a.addEventListener("targetLost", () => {
+      const idx = Number(a.dataset.index);
+
+      // Обновим подсказку только если это “текущая” метка
+      if (idx === currentIndex && currentGroup){
+        setPanelText(currentGroup, idx, false);
+        setStatus(`Метка #${idx} потеряна, видео продолжает идти`);
+      }
+    });
+
+    anchorsRoot.appendChild(a);
+  }
+}
+
+/* -----------------------------
+  [БЛОК H] Старт
+------------------------------ */
 sceneEl.addEventListener("loaded", () => {
-  arSystem = sceneEl.systems["mindar-image-system"];
-
-  if(!arSystem){
-    showError("MindAR system не найден. Проверь подключение mindar-image-aframe.prod.js");
-    setStatus("Ошибка загрузки");
-    return;
-  }
-
-  // Теперь можно нажимать Start
-  startBtn.disabled = false;
-  setStatus("Нажмите «Старт AR»");
+  buildAnchors();
+  setStatus("Камера включается… Наведи на метку");
 });
 
-/* События MindAR: arReady/arError (как в примерах документации) */
-sceneEl.addEventListener("arReady", () => {
-  // AR реально поднялся, камера должна быть видна
-  setStatus("AR включён — наведи на метку");
-});
-
-sceneEl.addEventListener("arError", (e) => {
-  // Обычно это проблемы с камерой/разрешениями/устройством
-  showError("MindAR не смог запуститься (arError). Проверь разрешение камеры и браузер.");
-  setStatus("Ошибка AR");
-});
-
-/* Кнопка Start */
-startBtn.addEventListener("click", async () => {
-  hideError();
-
-  if(!arSystem){
-    showError("Сцена ещё не загрузилась. Подожди 1–2 секунды и попробуй снова.");
-    return;
-  }
-
-  if(isRunning) return;
-
-  setStatus("Проверяю targets.mind…");
-  const chk = await checkTargetsMind();
-  if(!chk.ok){
-    showError(chk.msg);
-    setStatus("AR не запущен");
-    return;
-  }
-
-  try{
-    setStatus("Запуск AR…");
-
-    // Маленькая задержка, чтобы A-Frame успел закончить инициализацию (устраняет dummyRun)
-    await new Promise(r => requestAnimationFrame(() => r()));
-
-    await arSystem.start();  // запуск AR (камера включится здесь)
-
-    isRunning = true;
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-
-    // Статус “AR включён…” выставится ещё точнее в arReady
-  }catch(err){
-    showError(String(err));
-    setStatus("Ошибка запуска AR");
-  }
-});
-
-/* Кнопка Stop */
-stopBtn.addEventListener("click", async () => {
-  hideError();
-
-  if(!arSystem) return;
-
-  try{
-    await arSystem.stop();
-  }catch(e){
-    // не критично
-  }
-
-  isRunning = false;
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-
-  setStatus("AR остановлен");
-});
-
-/* Справка */
-helpBtn.addEventListener("click", () => {
-  alert(
-    "Если экран чёрный:\n" +
-    "1) Нажми «Старт AR»\n" +
-    "2) Разреши доступ к камере\n" +
-    "3) Проверь, что targets.mind открывается по ссылке:\n" +
-    location.origin + location.pathname.replace(/\/[^/]*$/, "/") + "targets.mind\n"
-  );
+/* Если MindAR упадёт, будет arError */
+sceneEl.addEventListener("arError", () => {
+  setStatus("Ошибка AR. Проверь HTTPS и доступ к камере.");
 });
