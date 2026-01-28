@@ -4,47 +4,51 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>AR — Камера</title>
-
   <link rel="stylesheet" href="camera.css" />
 
-  <!-- A-Frame -->
+  <!-- ВАЖНО: никаких index.js / polyfill тут не подключаем -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-
-  <!-- MindAR (A-Frame build) -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 
 <body>
-  <div class="arRoot">
-
-    <!-- AR сцена. ВАЖНО: targets.mind лежит рядом с camera.html -->
-    <a-scene
-      id="scene"
-      embedded
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false"
-      renderer="colorManagement: true; antialias: true"
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: false; uiError: false;"
-    >
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-      <!-- Здесь JS создаст 25 “якорей” targetIndex: 0..24 -->
-      <a-entity id="targetsRoot"></a-entity>
-    </a-scene>
-
-    <!-- Только “Назад” -->
-    <a class="backBtn" href="./index.html" aria-label="Назад">← Назад</a>
-
-    <!-- Маленькое окно видео (HTML-оверлей). Сюда будет подставляться нужный ролик -->
-    <div class="videoDock" id="videoDock" hidden>
-      <video id="overlayVideo" playsinline webkit-playsinline muted></video>
-      <div class="videoLabel" id="videoLabel">Видео</div>
-    </div>
-
-    <!-- Сообщения/ошибки -->
-    <div class="msg" id="msg">Инициализация…</div>
+  <!-- Диагностическая панель (показывает, что реально происходит) -->
+  <div class="diag" id="diag">
+    <div class="diag__title">AR Диагностика</div>
+    <div class="diag__line" id="d1">1) Загрузка camera.js…</div>
+    <div class="diag__line" id="d2">2) Проверка targets.mind…</div>
+    <div class="diag__line" id="d3">3) MindAR system…</div>
+    <div class="diag__line" id="d4">4) Запуск камеры…</div>
+    <div class="diag__hint" id="dHint"></div>
   </div>
 
-  <script src="./camera.js"></script>
+  <!-- Подсказка “тапни/кликни” (это НЕ кнопка; нужен жест браузеру) -->
+  <div class="tapToStart" id="tapToStart" hidden>
+    Тапни/кликни по экрану, чтобы включить камеру
+  </div>
+
+  <!-- Сцена MindAR -->
+  <a-scene
+    id="scene"
+    embedded
+    vr-mode-ui="enabled:false"
+    device-orientation-permission-ui="enabled:false"
+    renderer="colorManagement:true; antialias:true"
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading:false; uiScanning:false; uiError:false;"
+  >
+    <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+    <a-entity id="anchors"></a-entity>
+  </a-scene>
+
+  <!-- Окно видео (маленькое) -->
+  <div class="videoPanel" id="videoPanel" hidden>
+    <div class="videoHeader">
+      <div class="videoTitle" id="videoTitle">Видео</div>
+      <div class="videoHint" id="videoHint">Метка найдена</div>
+    </div>
+    <video id="arVideo" playsinline muted controls></video>
+  </div>
+
+  <script src="camera.js"></script>
 </body>
 </html>
