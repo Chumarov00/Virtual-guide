@@ -1,15 +1,12 @@
 /* =========================================================
-  camera.js
-  Задача:
-  1) Создать якоря (targetIndex 0..24)
-  2) На targetFound выбрать нужный ролик
-  3) Показать видео в маленьком окне
-  4) На targetLost НЕ останавливать видео
+  camera.js — автозапуск, распознавание меток, показ видео
+  Диапазоны:
+  0..7   -> Bulygin's House.mp4
+  8..14  -> Naumov's house.mp4
+  15..24 -> Pchelin's House.MP4
+  ВАЖНО: при потере метки видео НЕ останавливаем
 ========================================================= */
 
-/* -----------------------------
-  [БЛОК A] DOM ссылки
------------------------------- */
 const sceneEl     = document.getElementById("scene");
 const anchorsRoot = document.getElementById("anchors");
 
@@ -20,26 +17,21 @@ const hintEl      = document.getElementById("videoHint");
 const videoEl     = document.getElementById("arVideo");
 
 /* -----------------------------
-  [БЛОК B] Настройка источников
-  ВАЖНО: тут ты будешь менять пути.
-  Лучший вариант:
-  - положить mp4 рядом в репо (или в /videos/)
-  - указать относительные пути
+  1) Ссылки на видео
+  ВАЖНО: это должны быть ПРЯМЫЕ mp4 URL.
+  Если не работает — открой ссылку в браузере:
+  она должна отдавать mp4, а не страницу GitHub.
 ------------------------------ */
-const VIDEO_SOURCES = {
-  bulygin: "./videos/Bulygin's House.mp4",   // <-- поменяй путь под себя
-  naumov:  "./videos/Naumov's house.mp4",    // <-- поменяй путь под себя
-  pchelin: "./videos/Pchelin's House.MP4"   // <-- поменяй путь под себя
+const VIDEO_URLS = {
+  bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
+  naumov:  "https://chumarov00.github.io/Virtual-guide/Naumov%27s%20house.mp4",
+  pchelin: "https://chumarov00.github.io/Virtual-guide/Pchelin%27s%20House.MP4",
 };
 
 /* -----------------------------
-  [БЛОК C] Правило: index -> группа видео
-  По твоему ТЗ:
-  0..7   -> bulygin
-  8..14  -> naumov
-  15..24 -> pchelin
+  2) targetIndex -> группа видео
 ------------------------------ */
-function groupByTargetIndex(i){
+function groupByIndex(i){
   if (i >= 0 && i <= 7)   return "bulygin";
   if (i >= 8 && i <= 14)  return "naumov";
   if (i >= 15 && i <= 24) return "pchelin";
@@ -47,108 +39,91 @@ function groupByTargetIndex(i){
 }
 
 /* -----------------------------
-  [БЛОК D] Текущее состояние
+  3) Состояние
 ------------------------------ */
-let currentGroup = null;   // какая группа сейчас играет
-let currentIndex = null;   // какой targetIndex последний нашли
+let currentGroup = null;
+let currentIndex = null;
 
 /* -----------------------------
-  [БЛОК E] Утилиты UI
+  4) UI утилиты
 ------------------------------ */
-function setStatus(text){
-  statusEl.textContent = text;
-}
+function setStatus(text){ statusEl.textContent = text; }
 
-function showPanel(){
+function showVideoPanel(group, idx, found){
   panelEl.hidden = false;
-}
-
-function setPanelText(group, index, found){
-  // Заголовок
-  titleEl.textContent = `Видео: ${group} (метка #${index})`;
-
-  // Подсказка справа
-  hintEl.textContent = found ? "Метка найдена" : "Метка потеряна (видео продолжает идти)";
+  titleEl.textContent = `Видео (метка #${idx})`;
+  hintEl.textContent = found
+    ? `Найдена метка #${idx} — группа: ${group}`
+    : `Метка потеряна — видео продолжает идти`;
 }
 
 /* -----------------------------
-  [БЛОК F] Включение видео
-  - Если та же группа: не перезапускаем
-  - Если другая группа: меняем src и стартуем
+  5) Запуск нужного видео
+  Правило:
+  - если уже играет нужная группа -> не перезапускаем
+  - если другая группа -> меняем src и play()
 ------------------------------ */
-async function playGroup(group, index){
-  const src = VIDEO_SOURCES[group];
+async function ensureVideo(group, idx){
+  const src = VIDEO_URLS[group];
 
   if (!src){
-    setStatus(`Нет источника для группы: ${group}`);
+    setStatus(`Нет видео для группы: ${group}`);
     return;
   }
 
-  // Если уже играет нужная группа — ничего не делаем
-  if (currentGroup === group && !videoEl.paused){
-    currentIndex = index;
-    setPanelText(group, index, true);
-    showPanel();
-    setStatus(`Метка #${index} → продолжаю это же видео`);
+  // если тот же ролик уже выбран — просто обновляем UI
+  if (currentGroup === group && videoEl.src === src && !videoEl.paused){
+    currentIndex = idx;
+    showVideoPanel(group, idx, true);
+    setStatus(`Метка #${idx} — продолжаю текущий ролик`);
     return;
   }
 
   currentGroup = group;
-  currentIndex = index;
+  currentIndex = idx;
 
-  // Меняем источник
+  // меняем видео
   videoEl.src = src;
-
-  // Показываем панель
-  setPanelText(group, index, true);
-  showPanel();
-  setStatus(`Метка #${index} → загружаю видео…`);
+  showVideoPanel(group, idx, true);
+  setStatus(`Метка #${idx} — загружаю видео…`);
 
   try{
-    // Пытаемся запустить
+    // попытка автозапуска (может блокироваться политикой браузера) [Unverified]
     await videoEl.play();
-    setStatus(`Видео играет (метка #${index})`);
+    setStatus(`Видео играет (метка #${idx})`);
   }catch(e){
-    // Автовоспроизведение может блокироваться политиками браузера [Unverified]
-    setStatus("Видео готово. Нажми Play в плеере.");
+    setStatus("Видео готово. Если не стартовало — нажми Play на плеере.");
   }
 }
 
 /* -----------------------------
-  [БЛОК G] Создаём anchors 0..24
-  Эти entity нужны для событий targetFound/targetLost
+  6) Создаём anchors 0..24
 ------------------------------ */
 function buildAnchors(){
   for(let i = 0; i <= 24; i++){
     const a = document.createElement("a-entity");
     a.setAttribute("mindar-image-target", `targetIndex: ${i}`);
-
-    // Сохраним индекс в dataset для удобства
     a.dataset.index = String(i);
 
-    // Событие: метка найдена
     a.addEventListener("targetFound", async () => {
       const idx = Number(a.dataset.index);
-      const group = groupByTargetIndex(idx);
+      const group = groupByIndex(idx);
 
       if (!group){
         setStatus(`Нашёл метку #${idx}, но нет правила для видео`);
         return;
       }
 
-      await playGroup(group, idx);
+      await ensureVideo(group, idx);
     });
 
-    // Событие: метка потеряна
-    // ВАЖНО: НЕ прячем панель и НЕ ставим pause()
     a.addEventListener("targetLost", () => {
       const idx = Number(a.dataset.index);
-
-      // Обновим подсказку только если это “текущая” метка
       if (idx === currentIndex && currentGroup){
-        setPanelText(currentGroup, idx, false);
-        setStatus(`Метка #${idx} потеряна, видео продолжает идти`);
+        showVideoPanel(currentGroup, idx, false);
+        setStatus(`Метка #${idx} потеряна — видео продолжает идти`);
       }
+      // ВАЖНО: никаких pause(), videoPanel не скрываем
     });
 
     anchorsRoot.appendChild(a);
@@ -156,14 +131,14 @@ function buildAnchors(){
 }
 
 /* -----------------------------
-  [БЛОК H] Старт
+  7) Старт
 ------------------------------ */
 sceneEl.addEventListener("loaded", () => {
   buildAnchors();
-  setStatus("Камера включается… Наведи на метку");
+  setStatus("Сканирование… Наведи на метку");
 });
 
-/* Если MindAR упадёт, будет arError */
+/* Если есть проблемы с камерой/AR */
 sceneEl.addEventListener("arError", () => {
-  setStatus("Ошибка AR. Проверь HTTPS и доступ к камере.");
+  setStatus("Ошибка AR. Проверь HTTPS и разрешение камеры.");
 });
