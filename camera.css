@@ -1,148 +1,132 @@
+/* =========================================================
+  [CAMERA CSS]
+  Визуально: тёмный UI поверх AR, видео-окно снизу
+========================================================= */
+
 html, body{
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: #000;
-  overflow: hidden;
+  margin:0;
+  height:100%;
+  overflow:hidden;
+  background:#000;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Сцена на весь экран */
+/* Сцена A-Frame на весь экран */
 a-scene{
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
 }
 
-/* Встроенный UI MindAR выключаем */
-.mindar-ui,
-.mindar-ui-overlay,
-.mindar-ui-scanning,
-.mindar-ui-loading,
-.mindar-ui-error{
-  display: none !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* UI слой поверх */
+/* UI поверх сцены */
 .ui{
-  position: fixed;
-  inset: 0;
-  z-index: 999999;
-  pointer-events: none; /* слой не ловит клики */
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  pointer-events:none;           /* чтобы AR не “ломался” кликами */
 }
 
-/* Но конкретные элементы — ловят */
 .ui *{
-  pointer-events: auto;
+  pointer-events:auto;           /* но наши кнопки/видео кликабельны */
 }
 
+/* Верхняя панель */
 .topBar{
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 12px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
+  position:absolute;
+  left:12px;
+  right:12px;
+  top:12px;
+
+  display:flex;
+  gap:10px;
+  align-items:center;
 }
 
-.pillBtn{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.35);
-  color: rgba(255,255,255,0.92);
-  text-decoration: none;
-  font-weight: 900;
-  font-size: 13px;
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
+/* Кнопка назад */
+.backBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:10px 12px;
+  border-radius:999px;
+
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.35);
+  color:rgba(255,255,255,.92);
+  text-decoration:none;
+
+  font-weight:900;
+  font-size:13px;
+  white-space:nowrap;
 }
 
+/* Статус по центру */
 .status{
-  flex: 1;
-  text-align: center;
-  padding: 10px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.35);
-  color: rgba(255,255,255,0.90);
-  font-weight: 900;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex:1;
+  text-align:center;
+
+  padding:10px 12px;
+  border-radius:999px;
+
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.35);
+  color:rgba(255,255,255,.9);
+
+  font-weight:900;
+  font-size:12px;
+
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
-.bottomBar{
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 14px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+/* Окно видео */
+.videoPanel{
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:14px;
+
+  max-width:520px;
+  margin:0 auto;
+
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.40);
+  backdrop-filter: blur(10px);
+
+  box-shadow:0 18px 46px rgba(0,0,0,.40);
+  overflow:hidden;
 }
 
-.btnPrimary{
-  border-radius: 18px;
-  padding: 12px 14px;
-  border: none;
-  color: rgba(255,255,255,0.95);
-  background: linear-gradient(135deg, #d77a2a, #c86418);
-  box-shadow: 0 20px 48px rgba(215,122,42,0.22);
-  font-weight: 950;
-  font-size: 14px;
-  cursor: pointer;
+/* Шапка видео-окна */
+.videoHeader{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,.10);
 }
 
-.btnGhost{
-  border-radius: 18px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.10);
-  color: rgba(255,255,255,0.90);
-  font-weight: 950;
-  font-size: 14px;
-  cursor: pointer;
+.videoTitle{
+  font-weight:950;
+  font-size:13px;
+  color:rgba(255,255,255,.95);
 }
 
-.btnPrimary:disabled,
-.btnGhost:disabled{
-  opacity: 0.55;
-  cursor: not-allowed;
+.videoHint{
+  font-weight:800;
+  font-size:12px;
+  color:rgba(180,220,255,.95);
+  opacity:.9;
 }
 
-.errorBox{
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 90px;
-  margin: 0 auto;
-  max-width: 560px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,80,80,0.35);
-  background: rgba(30,0,0,0.45);
-  color: rgba(255,255,255,0.95);
-  padding: 14px;
-  box-shadow: 0 18px 46px rgba(0,0,0,0.35);
-}
-
-.errorTitle{
-  font-weight: 950;
-  font-size: 16px;
-  margin-bottom: 6px;
-}
-
-.errorText{
-  font-weight: 650;
-  font-size: 13px;
-  line-height: 1.35;
+/* Само видео */
+.video{
+  width:100%;
+  height:auto;
+  display:block;
+  background:#000;
 }
