@@ -4,83 +4,46 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>AR — Камера</title>
-
-  <!-- Твои стили UI поверх камеры -->
   <link rel="stylesheet" href="camera.css" />
 
-  <!-- =========================================================
-    [LIB 1] A-Frame
-    - Движок, который рисует сцену и камеру
-  ========================================================= -->
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-
-  <!-- =========================================================
-    [LIB 2] MindAR (A-Frame build)
-    - Распознавание "image targets" из targets.mind
-    [Unverified] Версия CDN может меняться, но обычно это рабочий путь
-  ========================================================= -->
+  <!-- MindAR (image tracking) -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 
 <body>
 
-  <!-- =========================================================
-    [BLOCK UI] Панель управления поверх AR
-    - Кликабельна (canvas не должен перекрывать)
-  ========================================================= -->
+  <!-- UI поверх камеры: только статус + видео-окно -->
   <div class="ui">
+    <div class="status" id="status">Запуск камеры…</div>
 
-    <!-- Верхняя панель -->
-    <div class="topBar">
-      <!-- Назад на главную -->
-      <a class="pillBtn" href="index.html" aria-label="Назад">← Назад</a>
+    <div class="videoPanel" id="videoPanel" hidden>
+      <div class="videoHeader">
+        <div class="videoTitle" id="videoTitle">Видео</div>
+        <div class="videoHint" id="videoHint">Сканирование…</div>
+      </div>
 
-      <!-- Статус -->
-      <div class="status" id="status">Нажмите «Старт AR»</div>
-
-      <!-- Справка -->
-      <button class="pillBtn" id="helpBtn" type="button">?</button>
-    </div>
-
-    <!-- Нижняя панель -->
-    <div class="bottomBar">
-      <button class="btnPrimary" id="startBtn" type="button">Старт AR</button>
-      <button class="btnGhost" id="stopBtn" type="button" disabled>Стоп</button>
-    </div>
-
-    <!-- Блок ошибок -->
-    <div class="errorBox" id="errorBox" hidden>
-      <div class="errorTitle">Ошибка</div>
-      <div class="errorText" id="errorText"></div>
+      <!-- controls оставляем, чтобы пользователь мог нажать Play если браузер блокирует autoplay -->
+      <video id="arVideo" class="video" playsinline muted controls></video>
     </div>
   </div>
 
-  <!-- =========================================================
-    [BLOCK AR] A-Frame сцена + MindAR
-    ВАЖНО:
-    - targets.mind лежит рядом => ./targets.mind
-    - autoStart: false => запускаем ТОЛЬКО по кнопке
-    - uiLoading/uiScanning/uiError выключены, потому что у нас свой UI
-  ========================================================= -->
+  <!-- A-Frame сцена + MindAR -->
   <a-scene
     id="scene"
     embedded
     vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    renderer="colorManagement: true"
-    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: false; uiScanning: false; uiError: false;"
+    device-orientation-permission-ui="enabled: true"
+    renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true"
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: false; uiScanning: false; uiError: false;"
   >
-    <!-- Ресурсы (потом добавишь видео сюда) -->
-    <a-assets id="assets"></a-assets>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- Камера A-Frame (MindAR сам подключит реальную) -->
-    <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
-
-    <!-- Сюда позже добавим сущности targetIndex и видео-оверлеи -->
-    <a-entity id="targetsRoot"></a-entity>
+    <!-- anchors 0..24 создадим из JS -->
+    <a-entity id="anchors"></a-entity>
   </a-scene>
 
-  <!-- Логика запуска/остановки -->
   <script src="camera.js"></script>
 </body>
 </html>
