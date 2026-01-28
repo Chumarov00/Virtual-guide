@@ -1,144 +1,136 @@
 /* =========================================================
-  camera.js — автозапуск, распознавание меток, показ видео
-  Диапазоны:
-  0..7   -> Bulygin's House.mp4
-  8..14  -> Naumov's house.mp4
-  15..24 -> Pchelin's House.MP4
-  ВАЖНО: при потере метки видео НЕ останавливаем
+  camera.js — минимальный рабочий MindAR:
+  - targets.mind берётся из ./targets.mind (рядом с файлами)
+  - создаём targetIndex 0..24
+  - по распознаванию показываем маленькое HTML-видео-окно
+  - при потере метки видео НЕ останавливаем
+  - автостарт: пытаемся стартануть сразу; если браузер блокирует — старт при первом клике по экрану
 ========================================================= */
 
-const sceneEl     = document.getElementById("scene");
-const anchorsRoot = document.getElementById("anchors");
+const sceneEl = document.getElementById("scene");
+const targetsRoot = document.getElementById("targetsRoot");
 
-const statusEl    = document.getElementById("status");
-const panelEl     = document.getElementById("videoPanel");
-const titleEl     = document.getElementById("videoTitle");
-const hintEl      = document.getElementById("videoHint");
-const videoEl     = document.getElementById("arVideo");
+const msgEl = document.getElementById("msg");
+const videoDock = document.getElementById("videoDock");
+const overlayVideo = document.getElementById("overlayVideo");
+const videoLabel = document.getElementById("videoLabel");
 
-/* -----------------------------
-  1) Ссылки на видео
-  ВАЖНО: это должны быть ПРЯМЫЕ mp4 URL.
-  Если не работает — открой ссылку в браузере:
-  она должна отдавать mp4, а не страницу GitHub.
------------------------------- */
-const VIDEO_URLS = {
-  bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
-  naumov:  "https://chumarov00.github.io/Virtual-guide/Naumov%27s%20house.mp4",
-  pchelin: "https://chumarov00.github.io/Virtual-guide/Pchelin%27s%20House.MP4",
-};
+let running = false;
+let lastVideoUrl = null;
 
-/* -----------------------------
-  2) targetIndex -> группа видео
------------------------------- */
-function groupByIndex(i){
-  if (i >= 0 && i <= 7)   return "bulygin";
-  if (i >= 8 && i <= 14)  return "naumov";
-  if (i >= 15 && i <= 24) return "pchelin";
+/* ====== ТВОЯ ПРИВЯЗКА ИНДЕКСОВ -> ВИДЕО ======
+   ВАЖНО:
+   - ссылки вида github.com/.../blob/... НЕ подходят (там HTML-страница).
+   - Надёжно: положить mp4 рядом/в папку и ссылаться относительным путём.
+   Я оставил URL как ты дал — но если не заработает, это 99% из-за "blob".
+*/
+function getVideoUrlByTargetIndex(i){
+  if (i >= 0 && i <= 7)  return "https://github.com/Chumarov00/Virtual-guide/blob/main/Bulygin's%20House.mp4";
+  if (i >= 8 && i <= 14) return "https://github.com/Chumarov00/Virtual-guide/blob/main/Naumov's%20house.mp4";
+  if (i >= 15 && i <= 24) return "https://github.com/Chumarov00/Virtual-guide/blob/main/Pchelin's%20House.MP4";
   return null;
 }
 
-/* -----------------------------
-  3) Состояние
------------------------------- */
-let currentGroup = null;
-let currentIndex = null;
+/* Создаём targetIndex 0..24 */
+function buildTargets(){
+  const MAX = 24;
+  for (let i = 0; i <= MAX; i++){
+    const t = document.createElement("a-entity");
+    t.setAttribute("mindar-image-target", `targetIndex: ${i}`);
 
-/* -----------------------------
-  4) UI утилиты
------------------------------- */
-function setStatus(text){ statusEl.textContent = text; }
+    // События MindAR
+    t.addEventListener("targetFound", () => onFound(i));
+    t.addEventListener("targetLost",  () => onLost(i));
 
-function showVideoPanel(group, idx, found){
-  panelEl.hidden = false;
-  titleEl.textContent = `Видео (метка #${idx})`;
-  hintEl.textContent = found
-    ? `Найдена метка #${idx} — группа: ${group}`
-    : `Метка потеряна — видео продолжает идти`;
+    targetsRoot.appendChild(t);
+  }
 }
 
-/* -----------------------------
-  5) Запуск нужного видео
-  Правило:
-  - если уже играет нужная группа -> не перезапускаем
-  - если другая группа -> меняем src и play()
------------------------------- */
-async function ensureVideo(group, idx){
-  const src = VIDEO_URLS[group];
+/* Показать сообщение */
+function setMsg(text){
+  msgEl.textContent = text;
+}
 
-  if (!src){
-    setStatus(`Нет видео для группы: ${group}`);
+/* При распознавании */
+async function onFound(index){
+  const url = getVideoUrlByTargetIndex(index);
+  setMsg(`Метка #${index} распознана`);
+
+  if (!url){
     return;
   }
 
-  // если тот же ролик уже выбран — просто обновляем UI
-  if (currentGroup === group && videoEl.src === src && !videoEl.paused){
-    currentIndex = idx;
-    showVideoPanel(group, idx, true);
-    setStatus(`Метка #${idx} — продолжаю текущий ролик`);
+  // Если это уже то же самое видео — ничего не делаем
+  if (lastVideoUrl === url && !overlayVideo.paused){
+    videoDock.hidden = false;
     return;
   }
 
-  currentGroup = group;
-  currentIndex = idx;
+  lastVideoUrl = url;
 
-  // меняем видео
-  videoEl.src = src;
-  showVideoPanel(group, idx, true);
-  setStatus(`Метка #${idx} — загружаю видео…`);
+  // Показываем окно
+  videoDock.hidden = false;
+  videoLabel.textContent = `Видео для метки #${index}`;
+
+  // Меняем источник
+  overlayVideo.src = url;
 
   try{
-    // попытка автозапуска (может блокироваться политикой браузера) [Unverified]
-    await videoEl.play();
-    setStatus(`Видео играет (метка #${idx})`);
+    await overlayVideo.play();
   }catch(e){
-    setStatus("Видео готово. Если не стартовало — нажми Play на плеере.");
+    // Если браузер не дал autoplay — покажем подсказку
+    setMsg(`Метка #${index} распознана — нажми на видео, чтобы стартовало`);
+    // Клик по видео = пользовательский жест
+    overlayVideo.controls = true;
   }
 }
 
-/* -----------------------------
-  6) Создаём anchors 0..24
------------------------------- */
-function buildAnchors(){
-  for(let i = 0; i <= 24; i++){
-    const a = document.createElement("a-entity");
-    a.setAttribute("mindar-image-target", `targetIndex: ${i}`);
-    a.dataset.index = String(i);
+/* При потере метки — видео НЕ останавливаем */
+function onLost(index){
+  setMsg(`Метка #${index} потеряна — видео продолжается`);
+  // НИЧЕГО не делаем: не pause(), не скрываем окно
+}
 
-    a.addEventListener("targetFound", async () => {
-      const idx = Number(a.dataset.index);
-      const group = groupByIndex(idx);
+/* Запуск MindAR */
+async function startMindAR(){
+  if (running) return;
 
-      if (!group){
-        setStatus(`Нашёл метку #${idx}, но нет правила для видео`);
-        return;
-      }
+  const sys = sceneEl.systems["mindar-image-system"];
+  if (!sys){
+    setMsg("MindAR system не найден (проверь подключение mindar-image-aframe.prod.js)");
+    return;
+  }
 
-      await ensureVideo(group, idx);
-    });
-
-    a.addEventListener("targetLost", () => {
-      const idx = Number(a.dataset.index);
-      if (idx === currentIndex && currentGroup){
-        showVideoPanel(currentGroup, idx, false);
-        setStatus(`Метка #${idx} потеряна — видео продолжает идти`);
-      }
-      // ВАЖНО: никаких pause(), videoPanel не скрываем
-    });
-
-    anchorsRoot.appendChild(a);
+  try{
+    setMsg("Запуск камеры…");
+    await sys.start();
+    running = true;
+    setMsg("Камера включена — наведи на метку");
+  }catch(e){
+    // Частая причина: браузер требует жест (tap/click), либо камера занята.
+    setMsg("Не удалось стартовать. Кликни по экрану для запуска / проверь, что камера не занята.");
+    console.error(e);
   }
 }
 
-/* -----------------------------
-  7) Старт
------------------------------- */
+/* Пытаемся стартовать, но если браузер блокирует — старт по первому клику */
+function armAutostart(){
+  // 1) попытка сразу после загрузки сцены
+  startMindAR();
+
+  // 2) запасной вариант: первый клик/тап
+  const once = async () => {
+    await startMindAR();
+    window.removeEventListener("click", once);
+    window.removeEventListener("touchstart", once);
+  };
+  window.addEventListener("click", once, { once: true });
+  window.addEventListener("touchstart", once, { once: true });
+}
+
+/* Инициализация */
 sceneEl.addEventListener("loaded", () => {
-  buildAnchors();
-  setStatus("Сканирование… Наведи на метку");
-});
-
-/* Если есть проблемы с камерой/AR */
-sceneEl.addEventListener("arError", () => {
-  setStatus("Ошибка AR. Проверь HTTPS и разрешение камеры.");
+  buildTargets();
+  setMsg("Готово. Запускаю камеру…");
+  armAutostart();
 });
