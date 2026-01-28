@@ -1,8 +1,3 @@
-/* =========================================================
-  [CAMERA CSS]
-  Визуально: тёмный UI поверх AR, видео-окно снизу
-========================================================= */
-
 html, body{
   margin:0;
   height:100%;
@@ -11,7 +6,7 @@ html, body{
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Сцена A-Frame на весь экран */
+/* A-Frame на весь экран */
 a-scene{
   position:fixed;
   inset:0;
@@ -19,57 +14,32 @@ a-scene{
   height:100%;
 }
 
-/* UI поверх сцены */
+/* UI поверх */
 .ui{
   position:fixed;
   inset:0;
   z-index:9999;
-  pointer-events:none;           /* чтобы AR не “ломался” кликами */
+  pointer-events:none;
 }
 
 .ui *{
-  pointer-events:auto;           /* но наши кнопки/видео кликабельны */
+  pointer-events:auto;
 }
 
-/* Верхняя панель */
-.topBar{
+/* статус сверху по центру */
+.status{
   position:absolute;
   left:12px;
   right:12px;
   top:12px;
 
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
+  max-width:680px;
+  margin:0 auto;
 
-/* Кнопка назад */
-.backBtn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-
-  padding:10px 12px;
-  border-radius:999px;
-
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(0,0,0,.35);
-  color:rgba(255,255,255,.92);
-  text-decoration:none;
-
-  font-weight:900;
-  font-size:13px;
-  white-space:nowrap;
-}
-
-/* Статус по центру */
-.status{
-  flex:1;
   text-align:center;
-
   padding:10px 12px;
-  border-radius:999px;
 
+  border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(0,0,0,.35);
   color:rgba(255,255,255,.9);
@@ -82,7 +52,7 @@ a-scene{
   white-space:nowrap;
 }
 
-/* Окно видео */
+/* окно видео снизу */
 .videoPanel{
   position:absolute;
   left:12px;
@@ -101,11 +71,11 @@ a-scene{
   overflow:hidden;
 }
 
-/* Шапка видео-окна */
 .videoHeader{
   display:flex;
   justify-content:space-between;
   gap:10px;
+
   padding:10px 12px;
   border-bottom:1px solid rgba(255,255,255,.10);
 }
@@ -123,7 +93,6 @@ a-scene{
   opacity:.9;
 }
 
-/* Само видео */
 .video{
   width:100%;
   height:auto;
