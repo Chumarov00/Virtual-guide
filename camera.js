@@ -1,31 +1,29 @@
 /* =========================================================
-  camera.js (диагностика + распознавание + видео)
-  ВАЖНО: autoStart=false, потому что многим браузерам нужен жест.
+  camera.js
+  - Старт AR (камера) сразу, если можно
+  - Если браузер требует “жест” — просим клик/тап
+  - Ловим targetFound/targetLost для 0..24
+  - Привязка видео к диапазонам:
+    0..7   -> Bulygin
+    8..14  -> Naumov
+    15..24 -> Pchelin
+  - При потере метки видео НЕ останавливаем
 ========================================================= */
 
 const sceneEl     = document.getElementById("scene");
 const anchorsRoot = document.getElementById("anchors");
 
-const d1 = document.getElementById("d1");
-const d2 = document.getElementById("d2");
-const d3 = document.getElementById("d3");
-const d4 = document.getElementById("d4");
-const dHint = document.getElementById("dHint");
+const statusEl    = document.getElementById("status");
+const tapEl       = document.getElementById("tap");
 
-const tapToStart = document.getElementById("tapToStart");
+const videoPanel  = document.getElementById("videoPanel");
+const videoTitle  = document.getElementById("videoTitle");
+const videoHint   = document.getElementById("videoHint");
+const videoEl     = document.getElementById("arVideo");
 
-const videoPanel = document.getElementById("videoPanel");
-const videoTitle = document.getElementById("videoTitle");
-const videoHint  = document.getElementById("videoHint");
-const videoEl    = document.getElementById("arVideo");
-
-d1.textContent = "1) camera.js загружен ✅";
-
-/* ======= НАСТРОЙ: ссылки на видео =======
-   ВНИМАНИЕ:
-   Ссылки вида github.com/.../blob/...mp4 = HTML-страница GitHub, видео не проиграется.
-   Нужны ПРЯМЫЕ mp4 по GitHub Pages или локально в репо.
-   Я ставлю GitHub Pages вариант. Если mp4 у тебя лежат в корне репо Virtual-guide — это должно работать. [Unverified]
+/* ====== ВИДЕО-ССЫЛКИ ======
+   ВАЖНО: это должны быть ПРЯМЫЕ mp4, а не github.com/blob.
+   Если не проигрывается — открой ссылку в браузере: должна открыться/скачаться mp4.
 */
 const VIDEO_URLS = {
   bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
@@ -33,6 +31,9 @@ const VIDEO_URLS = {
   pchelin: "https://chumarov00.github.io/Virtual-guide/Pchelin%27s%20House.MP4",
 };
 
+function setStatus(t){ statusEl.textContent = t; }
+
+/* targetIndex -> группа */
 function groupByIndex(i){
   if (i >= 0 && i <= 7)   return "bulygin";
   if (i >= 8 && i <= 14)  return "naumov";
@@ -40,31 +41,14 @@ function groupByIndex(i){
   return null;
 }
 
+/* Состояние */
+let running = false;
 let currentGroup = null;
 let currentIndex = null;
 
-/* Проверяем, что targets.mind реально отдается */
-async function checkTargets(){
-  const url = new URL("./targets.mind", location.href).toString();
-  try{
-    const r = await fetch(url, { cache: "no-store" });
-    if(!r.ok){
-      d2.textContent = `2) targets.mind ❌ HTTP ${r.status}`;
-      dHint.textContent = `Открой вручную: ${url}`;
-      return false;
-    }
-    d2.textContent = "2) targets.mind ✅ доступен";
-    return true;
-  }catch(e){
-    d2.textContent = "2) targets.mind ❌ fetch blocked";
-    dHint.textContent = "Проверь HTTPS и что файл реально опубликован.";
-    return false;
-  }
-}
-
-/* Создаем anchors 0..24 */
+/* Создаём anchors 0..24 */
 function buildAnchors(){
-  for(let i=0;i<=24;i++){
+  for(let i = 0; i <= 24; i++){
     const a = document.createElement("a-entity");
     a.setAttribute("mindar-image-target", `targetIndex: ${i}`);
 
@@ -75,80 +59,82 @@ function buildAnchors(){
   }
 }
 
+/* Когда метка найдена */
 async function onFound(idx){
   const group = groupByIndex(idx);
-  if(!group) return;
-
-  const src = VIDEO_URLS[group];
-  videoPanel.hidden = false;
-  videoTitle.textContent = `Видео: ${group} (метка #${idx})`;
-  videoHint.textContent = "Метка найдена";
-
-  // если уже это видео играет — не дергаем
-  if(currentGroup === group && !videoEl.paused){
-    currentIndex = idx;
+  if(!group){
+    setStatus(`Найдена метка #${idx}, но нет правила для видео`);
     return;
   }
 
+  const src = VIDEO_URLS[group];
   currentGroup = group;
   currentIndex = idx;
+
+  videoPanel.hidden = false;
+  videoTitle.textContent = `Видео: ${group} (метка #${idx})`;
+  videoHint.textContent  = "Метка найдена";
+
+  // Если уже играет этот же ролик — не перезапускаем
+  if (videoEl.src === src && !videoEl.paused){
+    setStatus(`Метка #${idx} — продолжаю видео`);
+    return;
+  }
 
   videoEl.src = src;
 
   try{
     await videoEl.play();
+    setStatus(`Метка #${idx} — видео играет`);
   }catch(e){
-    // autoplay может блокироваться, controls оставлены чтобы нажали Play
-    videoHint.textContent = "Нажми Play (автозапуск заблокирован)";
+    // autoplay может блокироваться — поэтому controls включены
+    setStatus(`Метка #${idx} — нажми Play (автозапуск заблокирован)`);
+    videoHint.textContent = "Нажми Play";
   }
 }
 
+/* Когда метка потеряна — НЕ останавливаем видео */
 function onLost(idx){
   if(idx === currentIndex){
     videoHint.textContent = "Метка потеряна — видео продолжает идти";
+    setStatus(`Метка #${idx} потеряна — видео продолжается`);
   }
-  // НИЧЕГО не останавливаем
 }
 
-/* Запуск MindAR */
+/* Запуск AR */
 async function startAR(){
+  if (running) return;
+
   const sys = sceneEl.systems["mindar-image-system"];
   if(!sys){
-    d3.textContent = "3) MindAR system ❌ не найден";
-    dHint.textContent = "Проверь подключение mindar-image-aframe.prod.js";
+    setStatus("Ошибка: MindAR system не найден");
     return;
   }
-  d3.textContent = "3) MindAR system ✅ найден";
 
   try{
-    d4.textContent = "4) Запуск камеры…";
+    setStatus("Запуск камеры…");
     await sys.start();
-    d4.textContent = "4) Камера запущена ✅ Сканируй метку";
-    tapToStart.hidden = true;
+    running = true;
+    tapEl.hidden = true;
+    setStatus("Камера запущена — наведи на метку");
   }catch(e){
-    d4.textContent = "4) Камера ❌ не стартовала";
-    tapToStart.hidden = false;
-    dHint.textContent =
-      "Браузер мог потребовать жест (тап/клик) или камера занята другим приложением.\n" +
-      "Кликни по экрану. Если не поможет — смотри Console: NotReadableError/NotAllowedError.";
+    // Часто: браузер требует жест или камера занята
+    tapEl.hidden = false;
+    setStatus("Не стартовало — кликни/тапни по экрану или проверь камеру");
     console.error(e);
   }
 }
 
 /* Инициализация */
-sceneEl.addEventListener("loaded", async () => {
+sceneEl.addEventListener("loaded", () => {
   buildAnchors();
-
-  const ok = await checkTargets();
-  if(!ok) return;
-
-  // Пытаемся стартовать сразу
-  await startAR();
+  setStatus("Готово — стартую камеру…");
+  startAR();
 });
 
-/* Запасной запуск по первому тапу/клику (это НЕ кнопка) */
-async function tryStartOnGesture(){
+/* Запасной старт по жесту */
+async function startOnGesture(){
   await startAR();
 }
-window.addEventListener("click", tryStartOnGesture, { passive: true });
-window.addEventListener("touchstart", tryStartOnGesture, { passive: true });
+window.addEventListener("click", startOnGesture, { passive:true });
+window.addEventListener("touchstart", startOnGesture, { passive:true });
