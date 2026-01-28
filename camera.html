@@ -3,33 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>AR — Камера</title>
+  <title>AR — Камера2</title>
 
   <link rel="stylesheet" href="camera.css" />
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <!-- MindAR (image tracking for A-Frame) -->
+  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 
 <body>
-  <!-- Статус/подсказка -->
-  <div class="status" id="status">Инициализация…</div>
 
-  <!-- Подсказка жеста (иногда нужна для запуска камеры) -->
-  <div class="tap" id="tap" hidden>Тапни/кликни по экрану, чтобы включить камеру</div>
-
-  <!-- Маленькое окно видео -->
-  <div class="videoPanel" id="videoPanel" hidden>
-    <div class="videoHeader">
-      <div class="videoTitle" id="videoTitle">Видео</div>
-      <div class="videoHint" id="videoHint">Сканирование…</div>
-    </div>
-    <video id="arVideo" playsinline muted controls></video>
+  <!-- Верхняя панель -->
+  <div class="topBar">
+    <a class="pillBtn" href="./index.html">← Назад</a>
+    <div class="status" id="status">Нажмите «Запустить AR»</div>
   </div>
 
-  <!-- AR сцена -->
+  <!-- Нижняя панель (кнопки) -->
+  <div class="bottomBar">
+    <button class="btnPrimary" id="startBtn" type="button">Запустить AR</button>
+    <button class="btnGhost" id="stopBtn" type="button" disabled>Остановить</button>
+  </div>
+
+  <!-- Сцена AR -->
   <a-scene
     id="scene"
     embedded
@@ -40,8 +38,8 @@
   >
     <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
 
-    <!-- anchors создадим из JS -->
-    <a-entity id="anchors"></a-entity>
+    <!-- Сюда JS добавит 25 целей (0..24) -->
+    <a-entity id="targetsRoot"></a-entity>
   </a-scene>
 
   <script src="camera.js"></script>
