@@ -1,136 +1,154 @@
 /* =========================================================
-  camera.js — минимальный рабочий MindAR:
-  - targets.mind берётся из ./targets.mind (рядом с файлами)
-  - создаём targetIndex 0..24
-  - по распознаванию показываем маленькое HTML-видео-окно
-  - при потере метки видео НЕ останавливаем
-  - автостарт: пытаемся стартануть сразу; если браузер блокирует — старт при первом клике по экрану
+  camera.js (диагностика + распознавание + видео)
+  ВАЖНО: autoStart=false, потому что многим браузерам нужен жест.
 ========================================================= */
 
-const sceneEl = document.getElementById("scene");
-const targetsRoot = document.getElementById("targetsRoot");
+const sceneEl     = document.getElementById("scene");
+const anchorsRoot = document.getElementById("anchors");
 
-const msgEl = document.getElementById("msg");
-const videoDock = document.getElementById("videoDock");
-const overlayVideo = document.getElementById("overlayVideo");
-const videoLabel = document.getElementById("videoLabel");
+const d1 = document.getElementById("d1");
+const d2 = document.getElementById("d2");
+const d3 = document.getElementById("d3");
+const d4 = document.getElementById("d4");
+const dHint = document.getElementById("dHint");
 
-let running = false;
-let lastVideoUrl = null;
+const tapToStart = document.getElementById("tapToStart");
 
-/* ====== ТВОЯ ПРИВЯЗКА ИНДЕКСОВ -> ВИДЕО ======
-   ВАЖНО:
-   - ссылки вида github.com/.../blob/... НЕ подходят (там HTML-страница).
-   - Надёжно: положить mp4 рядом/в папку и ссылаться относительным путём.
-   Я оставил URL как ты дал — но если не заработает, это 99% из-за "blob".
+const videoPanel = document.getElementById("videoPanel");
+const videoTitle = document.getElementById("videoTitle");
+const videoHint  = document.getElementById("videoHint");
+const videoEl    = document.getElementById("arVideo");
+
+d1.textContent = "1) camera.js загружен ✅";
+
+/* ======= НАСТРОЙ: ссылки на видео =======
+   ВНИМАНИЕ:
+   Ссылки вида github.com/.../blob/...mp4 = HTML-страница GitHub, видео не проиграется.
+   Нужны ПРЯМЫЕ mp4 по GitHub Pages или локально в репо.
+   Я ставлю GitHub Pages вариант. Если mp4 у тебя лежат в корне репо Virtual-guide — это должно работать. [Unverified]
 */
-function getVideoUrlByTargetIndex(i){
-  if (i >= 0 && i <= 7)  return "https://github.com/Chumarov00/Virtual-guide/blob/main/Bulygin's%20House.mp4";
-  if (i >= 8 && i <= 14) return "https://github.com/Chumarov00/Virtual-guide/blob/main/Naumov's%20house.mp4";
-  if (i >= 15 && i <= 24) return "https://github.com/Chumarov00/Virtual-guide/blob/main/Pchelin's%20House.MP4";
+const VIDEO_URLS = {
+  bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
+  naumov:  "https://chumarov00.github.io/Virtual-guide/Naumov%27s%20house.mp4",
+  pchelin: "https://chumarov00.github.io/Virtual-guide/Pchelin%27s%20House.MP4",
+};
+
+function groupByIndex(i){
+  if (i >= 0 && i <= 7)   return "bulygin";
+  if (i >= 8 && i <= 14)  return "naumov";
+  if (i >= 15 && i <= 24) return "pchelin";
   return null;
 }
 
-/* Создаём targetIndex 0..24 */
-function buildTargets(){
-  const MAX = 24;
-  for (let i = 0; i <= MAX; i++){
-    const t = document.createElement("a-entity");
-    t.setAttribute("mindar-image-target", `targetIndex: ${i}`);
+let currentGroup = null;
+let currentIndex = null;
 
-    // События MindAR
-    t.addEventListener("targetFound", () => onFound(i));
-    t.addEventListener("targetLost",  () => onLost(i));
-
-    targetsRoot.appendChild(t);
+/* Проверяем, что targets.mind реально отдается */
+async function checkTargets(){
+  const url = new URL("./targets.mind", location.href).toString();
+  try{
+    const r = await fetch(url, { cache: "no-store" });
+    if(!r.ok){
+      d2.textContent = `2) targets.mind ❌ HTTP ${r.status}`;
+      dHint.textContent = `Открой вручную: ${url}`;
+      return false;
+    }
+    d2.textContent = "2) targets.mind ✅ доступен";
+    return true;
+  }catch(e){
+    d2.textContent = "2) targets.mind ❌ fetch blocked";
+    dHint.textContent = "Проверь HTTPS и что файл реально опубликован.";
+    return false;
   }
 }
 
-/* Показать сообщение */
-function setMsg(text){
-  msgEl.textContent = text;
+/* Создаем anchors 0..24 */
+function buildAnchors(){
+  for(let i=0;i<=24;i++){
+    const a = document.createElement("a-entity");
+    a.setAttribute("mindar-image-target", `targetIndex: ${i}`);
+
+    a.addEventListener("targetFound", () => onFound(i));
+    a.addEventListener("targetLost",  () => onLost(i));
+
+    anchorsRoot.appendChild(a);
+  }
 }
 
-/* При распознавании */
-async function onFound(index){
-  const url = getVideoUrlByTargetIndex(index);
-  setMsg(`Метка #${index} распознана`);
+async function onFound(idx){
+  const group = groupByIndex(idx);
+  if(!group) return;
 
-  if (!url){
+  const src = VIDEO_URLS[group];
+  videoPanel.hidden = false;
+  videoTitle.textContent = `Видео: ${group} (метка #${idx})`;
+  videoHint.textContent = "Метка найдена";
+
+  // если уже это видео играет — не дергаем
+  if(currentGroup === group && !videoEl.paused){
+    currentIndex = idx;
     return;
   }
 
-  // Если это уже то же самое видео — ничего не делаем
-  if (lastVideoUrl === url && !overlayVideo.paused){
-    videoDock.hidden = false;
-    return;
-  }
+  currentGroup = group;
+  currentIndex = idx;
 
-  lastVideoUrl = url;
-
-  // Показываем окно
-  videoDock.hidden = false;
-  videoLabel.textContent = `Видео для метки #${index}`;
-
-  // Меняем источник
-  overlayVideo.src = url;
+  videoEl.src = src;
 
   try{
-    await overlayVideo.play();
+    await videoEl.play();
   }catch(e){
-    // Если браузер не дал autoplay — покажем подсказку
-    setMsg(`Метка #${index} распознана — нажми на видео, чтобы стартовало`);
-    // Клик по видео = пользовательский жест
-    overlayVideo.controls = true;
+    // autoplay может блокироваться, controls оставлены чтобы нажали Play
+    videoHint.textContent = "Нажми Play (автозапуск заблокирован)";
   }
 }
 
-/* При потере метки — видео НЕ останавливаем */
-function onLost(index){
-  setMsg(`Метка #${index} потеряна — видео продолжается`);
-  // НИЧЕГО не делаем: не pause(), не скрываем окно
+function onLost(idx){
+  if(idx === currentIndex){
+    videoHint.textContent = "Метка потеряна — видео продолжает идти";
+  }
+  // НИЧЕГО не останавливаем
 }
 
 /* Запуск MindAR */
-async function startMindAR(){
-  if (running) return;
-
+async function startAR(){
   const sys = sceneEl.systems["mindar-image-system"];
-  if (!sys){
-    setMsg("MindAR system не найден (проверь подключение mindar-image-aframe.prod.js)");
+  if(!sys){
+    d3.textContent = "3) MindAR system ❌ не найден";
+    dHint.textContent = "Проверь подключение mindar-image-aframe.prod.js";
     return;
   }
+  d3.textContent = "3) MindAR system ✅ найден";
 
   try{
-    setMsg("Запуск камеры…");
+    d4.textContent = "4) Запуск камеры…";
     await sys.start();
-    running = true;
-    setMsg("Камера включена — наведи на метку");
+    d4.textContent = "4) Камера запущена ✅ Сканируй метку";
+    tapToStart.hidden = true;
   }catch(e){
-    // Частая причина: браузер требует жест (tap/click), либо камера занята.
-    setMsg("Не удалось стартовать. Кликни по экрану для запуска / проверь, что камера не занята.");
+    d4.textContent = "4) Камера ❌ не стартовала";
+    tapToStart.hidden = false;
+    dHint.textContent =
+      "Браузер мог потребовать жест (тап/клик) или камера занята другим приложением.\n" +
+      "Кликни по экрану. Если не поможет — смотри Console: NotReadableError/NotAllowedError.";
     console.error(e);
   }
 }
 
-/* Пытаемся стартовать, но если браузер блокирует — старт по первому клику */
-function armAutostart(){
-  // 1) попытка сразу после загрузки сцены
-  startMindAR();
-
-  // 2) запасной вариант: первый клик/тап
-  const once = async () => {
-    await startMindAR();
-    window.removeEventListener("click", once);
-    window.removeEventListener("touchstart", once);
-  };
-  window.addEventListener("click", once, { once: true });
-  window.addEventListener("touchstart", once, { once: true });
-}
-
 /* Инициализация */
-sceneEl.addEventListener("loaded", () => {
-  buildTargets();
-  setMsg("Готово. Запускаю камеру…");
-  armAutostart();
+sceneEl.addEventListener("loaded", async () => {
+  buildAnchors();
+
+  const ok = await checkTargets();
+  if(!ok) return;
+
+  // Пытаемся стартовать сразу
+  await startAR();
 });
+
+/* Запасной запуск по первому тапу/клику (это НЕ кнопка) */
+async function tryStartOnGesture(){
+  await startAR();
+}
+window.addEventListener("click", tryStartOnGesture, { passive: true });
+window.addEventListener("touchstart", tryStartOnGesture, { passive: true });
