@@ -4,46 +4,47 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>AR — Камера</title>
+
   <link rel="stylesheet" href="camera.css" />
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <!-- MindAR (image tracking) -->
+
+  <!-- MindAR (A-Frame build) -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 
 <body>
+  <div class="arRoot">
 
-  <!-- UI поверх камеры: только статус + видео-окно -->
-  <div class="ui">
-    <div class="status" id="status">Запуск камеры…</div>
+    <!-- AR сцена. ВАЖНО: targets.mind лежит рядом с camera.html -->
+    <a-scene
+      id="scene"
+      embedded
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+      renderer="colorManagement: true; antialias: true"
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: false; uiError: false;"
+    >
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <div class="videoPanel" id="videoPanel" hidden>
-      <div class="videoHeader">
-        <div class="videoTitle" id="videoTitle">Видео</div>
-        <div class="videoHint" id="videoHint">Сканирование…</div>
-      </div>
+      <!-- Здесь JS создаст 25 “якорей” targetIndex: 0..24 -->
+      <a-entity id="targetsRoot"></a-entity>
+    </a-scene>
 
-      <!-- controls оставляем, чтобы пользователь мог нажать Play если браузер блокирует autoplay -->
-      <video id="arVideo" class="video" playsinline muted controls></video>
+    <!-- Только “Назад” -->
+    <a class="backBtn" href="./index.html" aria-label="Назад">← Назад</a>
+
+    <!-- Маленькое окно видео (HTML-оверлей). Сюда будет подставляться нужный ролик -->
+    <div class="videoDock" id="videoDock" hidden>
+      <video id="overlayVideo" playsinline webkit-playsinline muted></video>
+      <div class="videoLabel" id="videoLabel">Видео</div>
     </div>
+
+    <!-- Сообщения/ошибки -->
+    <div class="msg" id="msg">Инициализация…</div>
   </div>
 
-  <!-- A-Frame сцена + MindAR -->
-  <a-scene
-    id="scene"
-    embedded
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: true"
-    renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true"
-    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: false; uiScanning: false; uiError: false;"
-  >
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-    <!-- anchors 0..24 создадим из JS -->
-    <a-entity id="anchors"></a-entity>
-  </a-scene>
-
-  <script src="camera.js"></script>
+  <script src="./camera.js"></script>
 </body>
 </html>
