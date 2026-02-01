@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>AR — Призраки прошлого24</title>
+  <title>AR — Призраки прошлого25</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 
   <!-- A-Frame + MindAR (порядок важен) -->
@@ -18,7 +18,6 @@
 
     /* =========================================================
       [TOP BAR] Назад + Статус
-      ВАЖНО: z-index выше, чем у всех оверлеев
     ========================================================= */
     .topBar{
       position:fixed; left:12px; right:12px; top:12px; z-index:10050;
@@ -108,34 +107,38 @@
 
     /* =========================================================
       [VIDEO OVERLAY] Контейнер видео
-      ВАЖНО: видео должно быть INLINE (не уходить в fullscreen)
+      КЛЮЧЕВОЕ ИЗМЕНЕНИЕ:
+      - фон должен быть ПРОЗРАЧНЫМ, иначе ты видишь чёрный фон, а не камеру
     ========================================================= */
     #videoDock{
       position:fixed;
-      left:0; right:0; top:0; bottom:0;
+      inset:0;
       z-index:10030;
-      background:#000;
-      display:none; /* включим через JS, когда нашли метку */
+
+      background: transparent;     /* ✅ было #000 => теперь камера видна */
+      display:none;                /* показываем при найденной метке */
     }
 
-    /* Само видео на весь экран, но inline */
+    /* Видео: на весь экран, но inline */
     #arVideo{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
       display:block;
-      background:#000;
-      object-fit:contain;
-      opacity: 1; /* меняется ползунком */
+
+      background: transparent;     /* ✅ чтобы не рисовать чёрный фон */
+      object-fit: cover;           /* ✅ убирает чёрные полосы по краям */
+      opacity: 1;                  /* регулируем ползунком */
     }
 
-    /* Прячем нативные контролы (на некоторых браузерах всё равно могут появиться) */
+    /* Прячем нативные контролы (они могут увести видео в системный fullscreen) */
     video::-webkit-media-controls { display:none !important; }
     video::-webkit-media-controls-panel { display:none !important; }
 
     /* =========================================================
       [VIDEO CONTROLS] Наши кнопки поверх видео
+      (делаем "стекло", чтобы было красиво и читабельно)
     ========================================================= */
     #videoControls{
       position:absolute;
@@ -159,7 +162,6 @@
       background:rgba(0,0,0,.45);
       backdrop-filter: blur(10px);
       color:rgba(255,255,255,.92);
-      text-decoration:none;
       font-weight:900;
       font-size:13px;
       user-select:none;
@@ -183,6 +185,7 @@
 
     /* =========================================================
       [OPACITY SLIDER] Ползунок прозрачности справа
+      (он тоже "стеклянный", но не закрывает камеру чёрным)
     ========================================================= */
     #opacityControl{
       position: absolute;
@@ -190,7 +193,7 @@
       top: 50%;
       transform: translateY(-50%);
       z-index: 10045;
-      display: none;  /* показываем при включении видео */
+      display: none;
       padding: 12px 10px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.14);
@@ -260,19 +263,15 @@
     </div>
   </div>
 
-  <!-- =========================================================
-    [VIDEO] Полноэкранный inline-оверлей (камера остаётся работать под ним)
-  ========================================================= -->
+  <!-- [VIDEO] Прозрачный fullscreen-оверлей -->
   <div id="videoDock">
     <video id="arVideo" playsinline webkit-playsinline muted></video>
 
-    <!-- Наши кнопки (НЕ нативные controls) -->
     <div id="videoControls">
       <button class="vbtn" id="playPauseBtn" type="button">⏸ Пауза</button>
       <div class="vhint" id="videoHint">Сканирование…</div>
     </div>
 
-    <!-- Ползунок прозрачности -->
     <div id="opacityControl" aria-label="Регулировка прозрачности видео">
       <div id="opacityLabel">Прозрачность</div>
       <input id="opacitySlider" type="range" min="20" max="100" value="100" step="1" />
@@ -283,9 +282,7 @@
     </div>
   </div>
 
-  <!-- =========================================================
-    [AR] A-Frame сцена
-  ========================================================= -->
+  <!-- [AR] A-Frame сцена -->
   <div id="ar">
     <a-scene
       id="scene"
@@ -300,7 +297,6 @@
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Контейнер: сюда JS добавит targets 0..24 -->
       <a-entity id="targetsRoot"></a-entity>
     </a-scene>
   </div>
@@ -352,7 +348,7 @@
     function setStatus(t){ statusEl.textContent = t; }
 
     /* =========================================================
-      [ROTATE HINT] показываем только на телефоне/планшете и в портрете
+      [ROTATE HINT] только телефон/планшет + портрет
     ========================================================= */
     let arStartedOnce = false;
 
@@ -368,17 +364,13 @@
         rotateHint.style.display = "none";
         return;
       }
-      if (isMobileLike() && isPortrait()){
-        rotateHint.style.display = "flex";
-      } else {
-        rotateHint.style.display = "none";
-      }
+      rotateHint.style.display = (isMobileLike() && isPortrait()) ? "flex" : "none";
     }
     window.addEventListener("resize", updateRotateHint);
     window.addEventListener("orientationchange", updateRotateHint);
 
     /* =========================================================
-      [OPACITY] Ползунок прозрачности видео
+      [OPACITY] прозрачность видео
     ========================================================= */
     opacitySlider.addEventListener("input", () => {
       const alpha = Number(opacitySlider.value) / 100;  // 0.2..1.0
@@ -386,12 +378,11 @@
     });
 
     /* =========================================================
-      [INLINE VIDEO HARDENING] чтобы не уходило в системный fullscreen
-      Это помогает на части устройств, но 100% гарантий на всех iOS нет. [Unverified]
+      [INLINE VIDEO HARDENING]
     ========================================================= */
     function hardenInlineVideo(){
-      videoEl.muted = true;                 // стабильнее autoplay
-      videoEl.playsInline = true;           // iOS inline
+      videoEl.muted = true;
+      videoEl.playsInline = true;
       videoEl.setAttribute("playsinline", "");
       videoEl.setAttribute("webkit-playsinline", "");
       videoEl.disablePictureInPicture = true;
@@ -401,21 +392,20 @@
     hardenInlineVideo();
 
     /* =========================================================
-      [PLAY/PAUSE] своя кнопка (без native controls)
+      [PLAY/PAUSE] своя кнопка
     ========================================================= */
     playPauseBtn.addEventListener("click", async () => {
       try{
         if (videoEl.paused){
           await videoEl.play();
           playPauseBtn.textContent = "⏸ Пауза";
-          videoHintEl.textContent = "Видео играет (камера работает)";
+          videoHintEl.textContent = "Видео играет — уменьшай прозрачность для эффекта";
         } else {
           videoEl.pause();
           playPauseBtn.textContent = "▶️ Играть";
-          videoHintEl.textContent = "Пауза (камера работает)";
+          videoHintEl.textContent = "Пауза";
         }
       }catch(e){
-        // Если браузер всё равно блокирует воспроизведение — покажем подсказку
         playPauseBtn.textContent = "▶️ Играть";
         videoHintEl.textContent = "Нажми ещё раз (браузер блокирует)";
         console.error(e);
@@ -423,7 +413,7 @@
     });
 
     /* =========================================================
-      [TARGETS] Создание target-entity 0..24
+      [TARGETS] Создание targets 0..24
     ========================================================= */
     function buildTargets(){
       targetsRoot.innerHTML = "";
@@ -437,10 +427,7 @@
     }
 
     /* =========================================================
-      [VIDEO LOGIC]
-      - при found: показываем видео-оверлей (призрак) и запускаем
-      - при lost: НЕ останавливаем (как ты просил)
-      Камера продолжает работать, потому что MindAR не останавливаем.
+      [VIDEO LOGIC] Found/Lost
     ========================================================= */
     let currentIndex = null;
     let currentSrc = "";
@@ -455,33 +442,29 @@
       const src = VIDEO_URLS[group];
       currentIndex = idx;
 
-      // Показываем оверлей с видео и ползунком
+      // показываем “призрака” поверх камеры (ВАЖНО: фон контейнера прозрачный)
       videoDock.style.display = "block";
       opacityControl.style.display = "block";
 
-      // Сбрасываем прозрачность на 100% (пользователь сам уменьшит)
+      // стартовая прозрачность 100% (потом пользователь уменьшит)
       opacitySlider.value = "100";
       videoEl.style.opacity = "1";
 
-      // Подсказки
-      setStatus(`Метка #${idx} найдена — запускаю “призрака”`);
-      videoHintEl.textContent = `Метка #${idx} найдена — “Призрак” включён`;
+      setStatus(`Метка #${idx} найдена — “Призраки прошлого”`);
+      videoHintEl.textContent = `Метка #${idx} найдена — уменьши прозрачность справа`;
 
-      // Если это то же видео и оно уже играет — не перезапускаем
+      // если тот же ролик уже идёт — не перезапускаем
       if (currentSrc === src && !videoEl.paused){
         return;
       }
 
-      // Меняем источник
       currentSrc = src;
       videoEl.src = src;
 
-      // Пытаемся запустить. muted помогает.
       try{
         await videoEl.play();
         playPauseBtn.textContent = "⏸ Пауза";
       }catch(e){
-        // Если автозапуск заблокирован — пользователь нажмёт нашу кнопку Play
         playPauseBtn.textContent = "▶️ Играть";
         videoHintEl.textContent = "Нажми ▶️ Играть (автозапуск заблокирован)";
         console.error(e);
@@ -493,7 +476,6 @@
         setStatus(`Метка #${idx} потеряна — видео продолжается`);
         videoHintEl.textContent = "Метка потеряна — “призрак” продолжается";
       }
-      // НИЧЕГО не останавливаем
     }
 
     /* =========================================================
@@ -545,9 +527,6 @@
       }
     }
 
-    /* =========================================================
-      [UI EVENTS]
-    ========================================================= */
     reloadBtn.addEventListener("click", () => location.reload());
     startBtn.addEventListener("click", startAR);
 
@@ -555,4 +534,3 @@
   </script>
 </body>
 </html>
-
