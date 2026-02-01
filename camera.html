@@ -1,445 +1,262 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <title>AR — Видео по меткам</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta charset="utf-8">
+  <title>AR — Видео по меткам23</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 
-  <!-- A-Frame + MindAR (порядок важен) -->
+  <!-- A-Frame + MindAR (как в твоём рабочем файле) -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
     /* =========================================================
-      (1) БАЗА СТРАНИЦЫ
+      [СТИЛИ] База
     ========================================================= */
-    html, body{
-      margin:0; padding:0; width:100%; height:100%;
-      overflow:hidden; background:#000;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-
-    /* A-Frame сцена — на весь экран */
-    a-scene{
-      position:fixed;
-      inset:0;
-      width:100%;
-      height:100%;
-      z-index:0;
-    }
+    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#000; }
+    #ar { position:fixed; inset:0; }
 
     /* =========================================================
-      (2) ВЕРХНЯЯ ПАНЕЛЬ: НАЗАД + СТАТУС
-      Важно: должна быть выше всех оверлеев, чтобы всегда нажималась.
+      [СТИЛИ] Верхняя панель: Назад + Статус
     ========================================================= */
     .topBar{
-      position:fixed;
-      left:12px; right:12px; top:12px;
-      z-index:10050;
+      position:fixed; left:12px; right:12px; top:12px; z-index:9999;
       display:flex; gap:10px; align-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       pointer-events:auto;
     }
     .pillBtn{
-      display:inline-flex;
-      align-items:center; justify-content:center;
-      padding:10px 12px;
-      border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px; border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      color:rgba(255,255,255,.92);
-      text-decoration:none;
-      font-weight:900;
-      font-size:13px;
-      user-select:none;
+      background:rgba(0,0,0,.45); backdrop-filter: blur(10px);
+      color:rgba(255,255,255,.92); text-decoration:none;
+      font-weight:900; font-size:13px; user-select:none;
     }
     .status{
-      flex:1;
-      padding:10px 12px;
-      border-radius:999px;
+      flex:1; padding:10px 12px; border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
+      background:rgba(0,0,0,.45); backdrop-filter: blur(10px);
       color:rgba(255,255,255,.92);
-      text-align:center;
-      font-weight:850;
-      font-size:12px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      text-align:center; font-weight:850; font-size:12px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
     /* =========================================================
-      (3) ОВЕРЛЕЙ СТАРТА (кнопка запуска — обязательна для камеры)
+      [СТИЛИ] Оверлей запуска (одна кнопка)
     ========================================================= */
-    .startOverlay{
-      position:fixed;
-      inset:0;
-      z-index:10000;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(11,12,15,.85);
-      pointer-events:auto;
+    #startOverlay{
+      position:fixed; inset:0; z-index:9998;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(11,12,15,0.85);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     .panel{
       width:min(720px, 92vw);
       border-radius:16px;
       padding:18px;
       background:#17191f;
+      box-shadow:0 10px 30px rgba(0,0,0,0.55);
       border:1px solid rgba(255,255,255,.10);
-      box-shadow:0 10px 30px rgba(0,0,0,.55);
       color:#fff;
     }
-    .panel h3{
-      margin:0 0 8px;
-      font-size:18px;
-      font-weight:950;
-    }
-    .panel p{
-      margin:0 0 14px;
-      opacity:.85;
-      font-size:13px;
-      line-height:1.35;
-    }
-    .actions{
-      display:flex;
-      gap:12px;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-    }
-    .btn{
-      border:0;
-      padding:11px 14px;
-      border-radius:12px;
-      font-weight:900;
-      cursor:pointer;
+    .panel h3{ margin:0 0 8px; font-size:18px; }
+    .panel p{ margin:0 0 14px; opacity:.85; font-size:13px; line-height:1.35; }
+
+    .actions{ display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap; }
+    button{
+      border:0; padding:11px 14px; border-radius:12px; font-weight:800; cursor:pointer;
       font-family: inherit;
     }
-    .btn.ghost{ background:#31394a; color:#fff; }
-    .btn.primary{ background:#4aa8ff; color:#001525; }
-    .note{
-      margin-top:10px;
-      font-size:12px;
-      opacity:.65;
-    }
-    .muted{ opacity:.75; }
+    .ghost{ background:#31394a; color:#fff; }
+    .primary{ background:#4aa8ff; color:#001525; }
 
     /* =========================================================
-      (4) ПОДСКАЗКА ПОВОРОТА ТЕЛЕФОНА (только мобильный портрет)
-      Важно: НЕ блокируем “Назад” — поэтому z-index ниже topBar.
+      [СТИЛИ] Окно видео (маленькое, снизу)
     ========================================================= */
-    .rotateHint{
+    #videoDock{
       position:fixed;
-      inset:0;
-      z-index:10020;           /* ниже topBar (10050), но выше сцены */
-      display:none;            /* включаем через JS */
-      align-items:center;
-      justify-content:center;
-      background: rgba(0,0,0,.55);
-      pointer-events:none;     /* чтобы не мешала нажатию кнопок */
-    }
-    .rotateHint__card{
-      width:min(520px, 92vw);
-      border-radius:18px;
-      padding:16px 16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(16,18,24,.75);
-      backdrop-filter: blur(12px);
-      color:#fff;
-      text-align:center;
-      pointer-events:none;
-    }
-    .rotateHint__icon{
-      width:64px; height:64px;
-      margin:0 auto 10px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.14);
-      background: radial-gradient(120px 60px at 30% 30%, rgba(74,168,255,.35), transparent 60%),
-                  linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:30px;
-    }
-    .rotateHint__title{
-      font-weight:950;
-      font-size:15px;
-      margin:0 0 6px;
-    }
-    .rotateHint__text{
-      margin:0;
-      opacity:.85;
-      font-size:13px;
-      line-height:1.35;
-    }
-
-    /* =========================================================
-      (5) ПОЛНОЭКРАННОЕ ВИДЕО (поверх камеры)
-      - Открывается при targetFound
-      - НЕ закрывается при targetLost
-      - controls оставляем (если autoplay заблокирован — нажмут Play)
-    ========================================================= */
-    .videoFull{
-      position:fixed;
-      inset:0;
-      z-index:10030;          /* выше rotateHint, ниже topBar */
-      display:none;
-      background:#000;
-    }
-
-    .videoFull.isOpen{
-      display:block;
-    }
-
-    /* Само видео на весь экран */
-    #arVideo{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit: contain;    /* чтобы не обрезать видео */
-      background:#000;
-    }
-
-    /* Маленькая плашка состояния поверх видео */
-    .videoLabel{
-      position:absolute;
       left:12px; right:12px;
       bottom:12px;
+      z-index:9999;
+
+      max-width:560px;
       margin:0 auto;
-      max-width:740px;
-      z-index:2;
-      border-radius:14px;
-      padding:10px 12px;
+
+      border-radius:18px;
+      overflow:hidden;
       border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.45);
+      background:rgba(0,0,0,.40);
       backdrop-filter: blur(10px);
-      color:rgba(255,255,255,.92);
-      font-size:12px;
-      font-weight:850;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      pointer-events:none;
+      box-shadow:0 18px 46px rgba(0,0,0,.40);
+
+      display:none; /* включим через JS, когда будет найдено видео */
     }
-    .videoLabel b{ font-weight:950; }
+    #videoHeader{
+      display:flex; justify-content:space-between; gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:rgba(255,255,255,.92);
+    }
+    #videoTitle{ font-weight:950; font-size:13px; }
+    #videoHint{ font-weight:800; font-size:12px; color:rgba(180,220,255,.95); }
+
+    #arVideo{
+      width:100%;
+      height:190px;
+      display:block;
+      background:#000;
+      object-fit:cover;
+    }
+
+    /* На маленьких экранах чуть ниже видео */
+    @media (max-width: 420px){
+      #arVideo{ height:170px; }
+    }
   </style>
 </head>
 
 <body>
 
   <!-- =========================================================
-    (A) Верхняя панель — всегда сверху
+    [UI] Верхняя панель
   ========================================================= -->
   <div class="topBar">
-    <!-- “Назад” работает всегда, даже когда видео на весь экран -->
-    <a class="pillBtn" id="backBtn" href="./index.html">← Назад</a>
+    <a class="pillBtn" href="./index.html">← Назад</a>
     <div class="status" id="status">Нажмите «Запустить AR»</div>
   </div>
 
   <!-- =========================================================
-    (B) Оверлей запуска
+    [UI] Оверлей запуска (одна кнопка)
   ========================================================= -->
-  <div class="startOverlay" id="startOverlay">
+  <div id="startOverlay">
     <div class="panel">
       <h3>Запуск AR</h3>
       <p>
         Нажмите кнопку, разрешите доступ к камере и наведите на метку/фото здания.
-        <br><span class="muted">Видео откроется на весь экран.</span>
+        <br><span style="opacity:.75">Видео появится внизу экрана.</span>
       </p>
-
       <div class="actions">
-        <button class="btn ghost" id="reloadBtn" type="button">Обновить</button>
-        <button class="btn primary" id="startBtn" type="button">Запустить AR</button>
+        <button class="ghost" id="reloadBtn" type="button">Обновить</button>
+        <button class="primary" id="startBtn" type="button">Запустить AR</button>
       </div>
-
-      <div class="note">
-        Если чёрный экран — часто камера занята другой вкладкой/приложением.
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================
-    (C) Подсказка поворота телефона (включается JS-ом)
-  ========================================================= -->
-  <div class="rotateHint" id="rotateHint" aria-hidden="true">
-    <div class="rotateHint__card">
-      <div class="rotateHint__icon">📱↻</div>
-      <div class="rotateHint__title">Поверни телефон горизонтально</div>
-      <p class="rotateHint__text">
-        Так метка распознаётся стабильнее, а видео будет удобнее смотреть.
+      <p style="margin-top:10px; font-size:12px; opacity:.65">
+        Если будет чёрный экран — чаще всего камера занята другой вкладкой/приложением.
       </p>
     </div>
   </div>
 
   <!-- =========================================================
-    (D) Полноэкранное видео (поверх камеры)
+    [UI] Окно видео (снизу)
   ========================================================= -->
-  <div class="videoFull" id="videoFull">
-    <video id="arVideo" playsinline webkit-playsinline muted controls></video>
-
-    <div class="videoLabel" id="videoLabel">
-      <div id="videoTitle"><b>Видео</b></div>
+  <div id="videoDock">
+    <div id="videoHeader">
+      <div id="videoTitle">Видео</div>
       <div id="videoHint">Сканирование…</div>
     </div>
+    <!-- muted=true помогает autoplay. controls оставил, чтобы можно было нажать Play при блокировке -->
+    <video id="arVideo" playsinline webkit-playsinline muted controls></video>
   </div>
 
   <!-- =========================================================
-    (E) AR-сцена (камера + распознавание)
-    targets.mind должен быть доступен по HTTPS и правильному пути
+    [AR] A-Frame сцена
+    ВАЖНО: targets.mind лежит рядом с этим файлом => "./targets.mind"
   ========================================================= -->
-  <a-scene
-    id="scene"
-    embedded
-    vr-mode-ui="enabled:false"
-    device-orientation-permission-ui="enabled:true"
-    renderer="colorManagement:true; physicallyCorrectLights:true; antialias:true"
-    mindar-image="imageTargetSrc: ./targets.mind; autoStart:false; uiScanning:false; uiError:false;"
-  >
-    <a-entity light="type: hemisphere; intensity: 0.9"></a-entity>
-    <a-entity light="type: directional; intensity: 0.9" position="1 2 1"></a-entity>
+  <div id="ar">
+    <a-scene
+      id="scene"
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: false; uiError: false;"
+      renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: true"
+      embedded>
 
-    <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+      <!-- Свет (чтобы сцена не была тёмной, хотя видео у нас HTML-оверлей) -->
+      <a-entity light="type: hemisphere; intensity: 0.9"></a-entity>
+      <a-entity light="type: directional; intensity: 0.9" position="1 2 1"></a-entity>
 
-    <!-- Сюда JS добавит 25 целей targetIndex: 0..24 -->
-    <a-entity id="targetsRoot"></a-entity>
-  </a-scene>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Контейнер: сюда JS добавит 25 targets (0..24) -->
+      <a-entity id="targetsRoot"></a-entity>
+    </a-scene>
+  </div>
 
   <script>
     /* =========================================================
-      (1) НАСТРОЙКИ: targets.mind
-      Если targets.mind рядом с этим camera.html — оставь как есть.
-      Если лежит в папке targets/targets.mind — поставь "./targets/targets.mind"
+      [НАСТРОЙКИ] 1) Где лежит targets.mind
+      Если файл targets.mind лежит в этой же папке — НЕ ТРОГАЙ.
+      Если лежит в подпапке targets/ — поменяй на "./targets/targets.mind"
     ========================================================= */
     const TARGETS_PATH = "./targets.mind";
 
     /* =========================================================
-      (2) НАСТРОЙКИ: видео и правила индексов
-      Ты говорил:
-        0..7   -> Bulygin
-        8..14  -> Naumov
-        15..24 -> Pchelin
+      [НАСТРОЙКИ] 2) Видео и диапазоны меток
+      ТЫ ПРОСИЛ:
+      0..7   -> Bulygin
+      8..14  -> Naumov
+      15..24 -> Pchelin
 
-      Важно:
-      - лучше хранить mp4 в папке ./videos/ рядом с camera.html
-      - или использовать прямой mp4 URL (НЕ github.com/blob)
+      ВАЖНО:
+      - НЕ используй github.com/.../blob/...mp4
+      - Используй прямой mp4 (лучше GitHub Pages) или относительный путь ./videos/...
     ========================================================= */
     const VIDEO_URLS = {
-      bulygin: "./videos/bulygin.mp4",
-      naumov:  "./videos/naumov.mp4",
-      pchelin: "./videos/pchelin.mp4",
+      bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
+      naumov:  "https://chumarov00.github.io/Virtual-guide/Naumov%27s%20house.mp4",
+      pchelin: "https://chumarov00.github.io/Virtual-guide/Pchelin%27s%20House.MP4"
     };
 
     function groupByIndex(i){
-      if (i >= 0 && i <= 7)  return "bulygin";
+      if (i >= 0 && i <= 7) return "bulygin";
       if (i >= 8 && i <= 14) return "naumov";
       if (i >= 15 && i <= 24) return "pchelin";
       return null;
     }
 
     /* =========================================================
-      (3) DOM элементы
+      [DOM] Элементы UI
     ========================================================= */
-    const statusEl     = document.getElementById("status");
+    const statusEl = document.getElementById("status");
     const startOverlay = document.getElementById("startOverlay");
-    const startBtn     = document.getElementById("startBtn");
-    const reloadBtn    = document.getElementById("reloadBtn");
+    const startBtn = document.getElementById("startBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
 
-    const rotateHint   = document.getElementById("rotateHint");
+    const videoDock  = document.getElementById("videoDock");
+    const videoTitle = document.getElementById("videoTitle");
+    const videoHint  = document.getElementById("videoHint");
+    const videoEl    = document.getElementById("arVideo");
 
-    const videoFull    = document.getElementById("videoFull");
-    const videoEl      = document.getElementById("arVideo");
-    const videoTitleEl = document.getElementById("videoTitle");
-    const videoHintEl  = document.getElementById("videoHint");
-
-    const sceneEl      = document.getElementById("scene");
-    const targetsRoot  = document.getElementById("targetsRoot");
+    const sceneEl = document.getElementById("scene");
+    const targetsRoot = document.getElementById("targetsRoot");
 
     function setStatus(t){ statusEl.textContent = t; }
 
     /* =========================================================
-      (4) Подсказка “переверни телефон”
-      - показываем только на устройствах с “coarse pointer” (обычно телефон/планшет)
-      - и только если портретная ориентация
-      - включаем после запуска AR
-    ========================================================= */
-    let arStartedOnce = false;
-
-    function isMobileLike(){
-      return window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-    }
-
-    function isPortrait(){
-      return window.matchMedia
-        ? window.matchMedia("(orientation: portrait)").matches
-        : (window.innerHeight > window.innerWidth);
-    }
-
-    function updateRotateHint(){
-      if(!arStartedOnce){
-        rotateHint.style.display = "none";
-        return;
-      }
-      if(isMobileLike() && isPortrait()){
-        rotateHint.style.display = "flex";
-      }else{
-        rotateHint.style.display = "none";
-      }
-    }
-
-    window.addEventListener("resize", updateRotateHint);
-    window.addEventListener("orientationchange", updateRotateHint);
-
-    /* =========================================================
-      (5) Проверка targets.mind
-    ========================================================= */
-    async function checkTargetsFile(){
-      // синхронизируем путь в атрибуте сцены (важно, если менял TARGETS_PATH)
-      sceneEl.setAttribute(
-        "mindar-image",
-        `imageTargetSrc: ${TARGETS_PATH}; autoStart:false; uiScanning:false; uiError:false;`
-      );
-
-      try{
-        const r = await fetch(TARGETS_PATH, { cache: "no-store" });
-        if(!r.ok) throw new Error(`targets.mind HTTP ${r.status}`);
-        return true;
-      }catch(e){
-        console.error(e);
-        setStatus("targets.mind не загрузился — проверь путь/публикацию");
-        alert("targets.mind не загрузился. Проверь, что файл доступен по HTTPS и путь правильный.");
-        return false;
-      }
-    }
-
-    /* =========================================================
-      (6) Создание targetIndex 0..24
+      [ЛОГИКА] Создание target-entity 0..24 и обработчики targetFound/targetLost
     ========================================================= */
     function buildTargets(){
       targetsRoot.innerHTML = "";
-      for(let i = 0; i <= 24; i++){
+
+      for(let i=0; i<=24; i++){
         const holder = document.createElement("a-entity");
         holder.setAttribute("mindar-image-target", `targetIndex: ${i}`);
+
         holder.addEventListener("targetFound", () => onFound(i));
         holder.addEventListener("targetLost",  () => onLost(i));
+
         targetsRoot.appendChild(holder);
       }
     }
 
     /* =========================================================
-      (7) Видео логика
-      Требования:
-      - видео на весь экран
-      - если метка потерялась — видео продолжает играть
-      - если нашли другую метку той же группы — не перезапускаем
+      [ЛОГИКА] Видео-управление
+      - при найденной метке ставим нужный mp4 и запускаем
+      - при потере метки НЕ останавливаем (как ты просил)
     ========================================================= */
     let currentGroup = null;
     let currentIndex = null;
-
-    function openVideoUI(){
-      videoFull.classList.add("isOpen");
-    }
 
     async function onFound(idx){
       const group = groupByIndex(idx);
@@ -452,48 +269,61 @@
       currentGroup = group;
       currentIndex = idx;
 
-      openVideoUI();
+      videoDock.style.display = "block";
+      videoTitle.textContent = `Видео: ${group} (метка #${idx})`;
+      videoHint.textContent  = "Метка найдена";
 
-      videoTitleEl.innerHTML = `<b>${group}</b> (метка #${idx})`;
-      videoHintEl.textContent = "Метка найдена";
-      setStatus(`Метка #${idx} — видео: ${group}`);
-
-      // Если уже играет это же видео — не перезапускаем
-      // (videoEl.src становится абсолютным, поэтому сравниваем по "includes")
-      if (videoEl.src && videoEl.src.includes(src) && !videoEl.paused){
+      // Если уже играет то же видео — не перезапускаем
+      if (videoEl.src === src && !videoEl.paused){
+        setStatus(`Метка #${idx} — продолжаю видео`);
         return;
       }
 
-      // Назначаем источник
+      // Меняем источник
       videoEl.src = src;
 
-      // Пробуем autoplay (muted помогает)
+      // Попробуем autoplay (muted помогает)
       try{
         await videoEl.play();
+        setStatus(`Метка #${idx} — видео играет`);
       }catch(e){
-        console.error(e);
-        // Если autoplay заблокирован — пользователь нажмёт Play в controls
-        videoHintEl.textContent = "Нажми Play";
+        // Если браузер блокирует — пользователь нажмёт Play на controls
         setStatus(`Метка #${idx} — нажми Play (автозапуск заблокирован)`);
+        videoHint.textContent = "Нажми Play";
+        console.error(e);
       }
     }
 
     function onLost(idx){
-      // НЕ останавливаем видео по требованию
       if (idx === currentIndex){
-        videoHintEl.textContent = "Метка потеряна — видео продолжается";
         setStatus(`Метка #${idx} потеряна — видео продолжается`);
+        videoHint.textContent = "Метка потеряна — видео продолжается";
       }
+      // НИЧЕГО не останавливаем
     }
 
     /* =========================================================
-      (8) Запуск MindAR по кнопке
+      [ЛОГИКА] Запуск/остановка MindAR (как в твоём рабочем файле)
     ========================================================= */
-    let running = false;
+    async function checkTargetsFile(){
+      // Гарантируем, что mindar-image читает именно тот путь, который мы хотим
+      sceneEl.setAttribute("mindar-image", `imageTargetSrc: ${TARGETS_PATH}; autoStart: false; uiScanning: false; uiError: false;`);
+
+      try{
+        const r = await fetch(TARGETS_PATH, { cache: "no-store" });
+        if(!r.ok){
+          throw new Error(`targets.mind не найден: HTTP ${r.status}`);
+        }
+        return true;
+      }catch(e){
+        setStatus("targets.mind не загрузился — проверь путь и GitHub Pages");
+        alert("targets.mind не загрузился. Проверь, что он лежит рядом с camera.html и доступен по HTTPS.");
+        console.error(e);
+        return false;
+      }
+    }
 
     async function startAR(){
-      if (running) return;
-
       const ok = await checkTargetsFile();
       if(!ok) return;
 
@@ -501,7 +331,7 @@
 
       const mindar = sceneEl.systems["mindar-image-system"];
       if(!mindar){
-        setStatus("MindAR system не найден");
+        setStatus("MindAR system не найден (ошибка подключения MindAR)");
         alert("MindAR system не найден. Проверь подключение mindar-image-aframe.prod.js");
         return;
       }
@@ -509,30 +339,23 @@
       try{
         setStatus("Запуск камеры…");
         await mindar.start();
-
-        running = true;
-        arStartedOnce = true;
-
-        // прячем оверлей запуска
-        startOverlay.style.display = "none";
-
-        // показываем/скрываем подсказку поворота (только телефон + портрет)
-        updateRotateHint();
-
         setStatus("Камера запущена — наведи на метку");
+        startOverlay.style.display = "none";
       }catch(e){
-        console.error(e);
+        // Частые причины: NotReadableError (камера занята), NotAllowedError (нет разрешения)
         setStatus(`Не удалось запустить камеру: ${e?.name || "ошибка"}`);
-        alert("Не удалось запустить камеру. Проверь разрешение и что камера не занята.");
+        alert("Не удалось запустить камеру/AR. Проверь разрешение и что камера не занята другой вкладкой/приложением.");
+        console.error(e);
       }
     }
 
     /* =========================================================
-      (9) UI события
+      [СОБЫТИЯ UI]
     ========================================================= */
     reloadBtn.addEventListener("click", () => location.reload());
     startBtn.addEventListener("click", startAR);
 
+    // На старте — просто статус
     setStatus("Нажмите «Запустить AR»");
   </script>
 </body>
