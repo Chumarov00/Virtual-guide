@@ -1,31 +1,36 @@
 /* =========================================================
   camera.js
-  Задача:
-  1) Запуск MindAR по кнопке (важно для разрешения камеры)
-  2) Создание targetIndex 0..24 из targets.mind
-  3) Привязка диапазонов индексов к видео
-  4) При потере метки видео НЕ останавливаем
+  - Запуск MindAR по кнопке
+  - targets.mind рядом с camera.html
+  - Метки: targetIndex 0..24
+  - Видео: по диапазонам индексов
+  - При потере метки видео НЕ останавливаем
 ========================================================= */
 
-/* =========================
-  (A) НАСТРОЙКИ
-  Тут ты меняешь пути и видео.
-========================= */
-
-// 1) Где лежит targets.mind:
-// - если targets.mind рядом с camera.html -> "./targets.mind"
-// - если лежит в подпапке targets/targets.mind -> "./targets/targets.mind"
+/* =========================================================
+  (A) НАСТРОЙКИ: путь к targets.mind
+  Если targets.mind лежит рядом с camera.html => "./targets.mind"
+========================================================= */
 const TARGETS_PATH = "./targets.mind";
 
-// 2) Видео (лучше локально ./videos/...)
-// Если видео лежат в папке videos/ рядом:
+/* =========================================================
+  (B) НАСТРОЙКИ: видео
+  1) Надёжный вариант: локальные файлы в папке ./videos/
+     - ./videos/bulygin.mp4
+     - ./videos/naumov.mp4
+     - ./videos/pchelin.mp4
+
+  2) Если используешь URL — ставь прямой mp4, не github.com/blob.
+========================================================= */
 const VIDEO_URLS = {
   bulygin: "./videos/bulygin.mp4",
   naumov:  "./videos/naumov.mp4",
   pchelin: "./videos/pchelin.mp4",
 };
 
-// 3) Диапазоны индексов -> какая группа видео
+/* =========================================================
+  (C) Правило: индекс метки -> группа видео
+========================================================= */
 function groupByIndex(i){
   if (i >= 0 && i <= 7)  return "bulygin";
   if (i >= 8 && i <= 14) return "naumov";
@@ -33,73 +38,66 @@ function groupByIndex(i){
   return null;
 }
 
-/* =========================
-  (B) DOM элементы
-========================= */
-const statusEl = document.getElementById("status");
-const startOverlay = document.getElementById("startOverlay");
-const startBtn = document.getElementById("startBtn");
-const reloadBtn = document.getElementById("reloadBtn");
+/* =========================================================
+  (D) DOM
+========================================================= */
+const statusEl      = document.getElementById("status");
+const startOverlay  = document.getElementById("startOverlay");
+const startBtn      = document.getElementById("startBtn");
+const reloadBtn     = document.getElementById("reloadBtn");
 
-const videoDock  = document.getElementById("videoDock");
-const videoTitle = document.getElementById("videoTitle");
-const videoHint  = document.getElementById("videoHint");
-const videoEl    = document.getElementById("arVideo");
+const videoDock     = document.getElementById("videoDock");
+const videoTitle    = document.getElementById("videoTitle");
+const videoHint     = document.getElementById("videoHint");
+const videoEl       = document.getElementById("arVideo");
 
-const sceneEl = document.getElementById("scene");
-const targetsRoot = document.getElementById("targetsRoot");
+const sceneEl       = document.getElementById("scene");
+const targetsRoot   = document.getElementById("targetsRoot");
 
 function setStatus(text){
   statusEl.textContent = text;
 }
 
-/* =========================
-  (C) Проверка targets.mind
-  Чтобы не было “чёрного экрана” из-за неверного пути.
-========================= */
+/* =========================================================
+  (E) Проверка доступности targets.mind
+  Если не грузится — AR не запустится.
+========================================================= */
 async function checkTargetsFile(){
-  // обновляем атрибут mindar-image, чтобы он точно использовал TARGETS_PATH
+  // Дублируем путь в атрибут mindar-image, чтобы точно совпадало
   sceneEl.setAttribute(
     "mindar-image",
-    `imageTargetSrc: ${TARGETS_PATH}; autoStart: false; uiScanning: false; uiError: false;`
+    `imageTargetSrc: ${TARGETS_PATH}; autoStart:false; uiScanning:false; uiError:false;`
   );
 
   try{
     const r = await fetch(TARGETS_PATH, { cache: "no-store" });
-    if(!r.ok){
-      throw new Error(`targets.mind HTTP ${r.status}`);
-    }
+    if(!r.ok) throw new Error(`targets.mind HTTP ${r.status}`);
     return true;
   }catch(e){
     console.error(e);
-    setStatus("targets.mind не загрузился — проверь путь/публикацию");
-    alert("targets.mind не загрузился. Проверь, что файл доступен по HTTPS и путь правильный.");
+    setStatus("targets.mind не загрузился — проверь путь и публикацию");
+    alert("targets.mind не загрузился. Проверь, что файл лежит рядом с camera.html и доступен по HTTPS.");
     return false;
   }
 }
 
-/* =========================
-  (D) Создание целей targetIndex: 0..24
-  Мы не вставляем видео в 3D сцену — видео у нас HTML-оверлей.
-========================= */
+/* =========================================================
+  (F) Создаём сущности меток 0..24
+========================================================= */
 function buildTargets(){
   targetsRoot.innerHTML = "";
-
   for(let i = 0; i <= 24; i++){
     const holder = document.createElement("a-entity");
     holder.setAttribute("mindar-image-target", `targetIndex: ${i}`);
-
     holder.addEventListener("targetFound", () => onFound(i));
     holder.addEventListener("targetLost",  () => onLost(i));
-
     targetsRoot.appendChild(holder);
   }
 }
 
-/* =========================
-  (E) Видео логика
-========================= */
-let currentGroup = null;
+/* =========================================================
+  (G) Видео логика
+========================================================= */
 let currentIndex = null;
 
 async function onFound(idx){
@@ -110,28 +108,26 @@ async function onFound(idx){
   }
 
   const src = VIDEO_URLS[group];
-  currentGroup = group;
   currentIndex = idx;
 
-  // показываем панель видео
+  // Показываем окно видео
   videoDock.hidden = false;
   videoTitle.textContent = `Видео: ${group} (метка #${idx})`;
-  videoHint.textContent  = "Метка найдена";
+  videoHint.textContent = "Метка найдена";
 
-  // если уже играет это видео — не перезапускаем
-  if (videoEl.getAttribute("src") === src && !videoEl.paused){
+  // Если уже играет тот же файл — не перезапускаем
+  if (videoEl.src && videoEl.src.endsWith(src) && !videoEl.paused){
     setStatus(`Метка #${idx} — продолжаю видео`);
     return;
   }
 
-  // ставим видео
+  // Назначаем видео
   videoEl.src = src;
 
   try{
     await videoEl.play();
     setStatus(`Метка #${idx} — видео играет`);
   }catch(e){
-    // autoplay может блокироваться — controls уже включены
     console.error(e);
     setStatus(`Метка #${idx} — нажми Play (автозапуск заблокирован)`);
     videoHint.textContent = "Нажми Play";
@@ -139,16 +135,16 @@ async function onFound(idx){
 }
 
 function onLost(idx){
-  // по твоему требованию — видео НЕ останавливаем
+  // Видео НЕ останавливаем
   if (idx === currentIndex){
     setStatus(`Метка #${idx} потеряна — видео продолжается`);
     videoHint.textContent = "Метка потеряна — видео продолжается";
   }
 }
 
-/* =========================
-  (F) Запуск/стоп MindAR
-========================= */
+/* =========================================================
+  (H) Запуск MindAR по кнопке
+========================================================= */
 let running = false;
 
 async function startAR(){
@@ -180,11 +176,11 @@ async function startAR(){
   }
 }
 
-/* =========================
-  (G) События UI
-========================= */
+/* =========================================================
+  (I) События UI
+========================================================= */
 reloadBtn.addEventListener("click", () => location.reload());
 startBtn.addEventListener("click", startAR);
 
-// стартовое состояние
+// Начальный текст
 setStatus("Нажмите «Запустить AR»");
