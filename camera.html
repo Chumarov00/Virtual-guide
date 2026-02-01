@@ -2,23 +2,23 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>AR — Видео по меткам23</title>
+  <title>AR — Призраки прошлого</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 
-  <!-- A-Frame + MindAR (как в твоём рабочем файле) -->
+  <!-- A-Frame + MindAR (порядок важен) -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
     /* =========================================================
-      [СТИЛИ] База
+      [BASE] База страницы
     ========================================================= */
     html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#000; }
     #ar { position:fixed; inset:0; }
 
     /* =========================================================
-      [СТИЛИ] Верхняя панель: Назад + Статус
-      ВАЖНО: z-index больше чем у видео, чтобы "Назад" всегда был кликабельный
+      [TOP BAR] Назад + Статус
+      ВАЖНО: z-index выше, чем у всех оверлеев
     ========================================================= */
     .topBar{
       position:fixed; left:12px; right:12px; top:12px; z-index:10050;
@@ -44,9 +44,8 @@
     }
 
     /* =========================================================
-      [НОВОЕ] Подсказка поворота телефона
-      - НЕ блокирует клики (pointer-events:none)
-      - Ниже topBar по z-index (чтобы "Назад" всегда нажимался)
+      [ROTATE HINT] Подсказка повернуть телефон
+      pointer-events:none => не блокирует клики
     ========================================================= */
     #rotateHint{
       position:fixed; inset:0; z-index:10020;
@@ -80,7 +79,7 @@
     .rotateText{ opacity:.85; font-size:13px; line-height:1.35; }
 
     /* =========================================================
-      [СТИЛИ] Оверлей запуска (одна кнопка)
+      [START OVERLAY] Старт AR (нужен жест пользователя)
     ========================================================= */
     #startOverlay{
       position:fixed; inset:0; z-index:9998;
@@ -99,7 +98,6 @@
     }
     .panel h3{ margin:0 0 8px; font-size:18px; }
     .panel p{ margin:0 0 14px; opacity:.85; font-size:13px; line-height:1.35; }
-
     .actions{ display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap; }
     button{
       border:0; padding:11px 14px; border-radius:12px; font-weight:800; cursor:pointer;
@@ -109,86 +107,90 @@
     .primary{ background:#4aa8ff; color:#001525; }
 
     /* =========================================================
-      [СТИЛИ] Окно видео (маленькое, снизу) — по умолчанию
+      [VIDEO OVERLAY] Контейнер видео
+      ВАЖНО: видео должно быть INLINE (не уходить в fullscreen)
     ========================================================= */
     #videoDock{
       position:fixed;
-      left:12px; right:12px;
-      bottom:12px;
-      z-index:10030; /* ниже topBar, но выше AR */
-      max-width:560px;
-      margin:0 auto;
-
-      border-radius:18px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.40);
-      backdrop-filter: blur(10px);
-      box-shadow:0 18px 46px rgba(0,0,0,.40);
-
-      display:none; /* включим через JS, когда будет найдено видео */
-    }
-    #videoHeader{
-      display:flex; justify-content:space-between; gap:10px;
-      padding:10px 12px;
-      border-bottom:1px solid rgba(255,255,255,.10);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:rgba(255,255,255,.92);
-    }
-    #videoTitle{ font-weight:950; font-size:13px; }
-    #videoHint{ font-weight:800; font-size:12px; color:rgba(180,220,255,.95); }
-
-    #arVideo{
-      width:100%;
-      height:190px;
-      display:block;
-      background:#000;
-      object-fit:cover;
-      opacity: 1; /* будет меняться ползунком */
-    }
-
-    @media (max-width: 420px){
-      #arVideo{ height:170px; }
-    }
-
-    /* =========================================================
-      [НОВОЕ] Полноэкранный режим видео (через класс .isFull)
-      Важно: не используем requestFullscreen(), только CSS.
-    ========================================================= */
-    #videoDock.isFull{
       left:0; right:0; top:0; bottom:0;
-      max-width:none;
-      margin:0;
-      border-radius:0;
+      z-index:10030;
       background:#000;
-      backdrop-filter:none;
-      box-shadow:none;
+      display:none; /* включим через JS, когда нашли метку */
     }
 
-    /* [НОВОЕ] Убираем нижнюю надпись/панель при полноэкранном видео */
-    #videoDock.isFull #videoHeader{
-      display: none !important;
-    }
-
-    #videoDock.isFull #arVideo{
+    /* Само видео на весь экран, но inline */
+    #arVideo{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
+      display:block;
+      background:#000;
       object-fit:contain;
+      opacity: 1; /* меняется ползунком */
+    }
+
+    /* Прячем нативные контролы (на некоторых браузерах всё равно могут появиться) */
+    video::-webkit-media-controls { display:none !important; }
+    video::-webkit-media-controls-panel { display:none !important; }
+
+    /* =========================================================
+      [VIDEO CONTROLS] Наши кнопки поверх видео
+    ========================================================= */
+    #videoControls{
+      position:absolute;
+      left:12px;
+      bottom:12px;
+      z-index:10040;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      pointer-events:auto;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .vbtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      color:rgba(255,255,255,.92);
+      text-decoration:none;
+      font-weight:900;
+      font-size:13px;
+      user-select:none;
+      cursor:pointer;
+    }
+
+    .vhint{
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      color:rgba(180,220,255,.95);
+      font-weight:850;
+      font-size:12px;
+      max-width:min(62vw, 520px);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     /* =========================================================
-      [НОВОЕ] Ползунок прозрачности (справа)
-      - появляется только когда видео включено
-========================================================= */
+      [OPACITY SLIDER] Ползунок прозрачности справа
+    ========================================================= */
     #opacityControl{
-      position: fixed;
+      position: absolute;
       right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      z-index: 10060; /* выше videoDock и выше всего */
-      display: none;  /* покажем через JS */
+      z-index: 10045;
+      display: none;  /* показываем при включении видео */
       padding: 12px 10px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.14);
@@ -197,8 +199,8 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: rgba(255,255,255,.92);
       user-select: none;
+      pointer-events: auto;
     }
-
     #opacityLabel{
       font-size: 12px;
       font-weight: 900;
@@ -206,16 +208,13 @@
       margin-bottom: 10px;
       opacity: .9;
     }
-
-    /* Вертикальный ползунок (через поворот) */
     #opacitySlider{
-      width: 220px;     /* станет "высотой" после rotate */
+      width: 240px;
       height: 28px;
       transform: rotate(-90deg);
       transform-origin: center;
       cursor: pointer;
     }
-
     #opacityMinMax{
       margin-top: 10px;
       display: flex;
@@ -228,65 +227,59 @@
 
 <body>
 
-  <!-- =========================================================
-    [UI] Верхняя панель
-  ========================================================= -->
+  <!-- [UI] Верхняя панель -->
   <div class="topBar">
     <a class="pillBtn" href="./index.html">← Назад</a>
     <div class="status" id="status">Нажмите «Запустить AR»</div>
   </div>
 
-  <!-- =========================================================
-    [UI] Подсказка поворота (телефон, портрет)
-  ========================================================= -->
+  <!-- [UI] Подсказка повернуть телефон -->
   <div id="rotateHint" aria-hidden="true">
     <div class="rotateCard">
       <div class="rotateIcon">📱↻</div>
       <div class="rotateTitle">Поверни телефон горизонтально</div>
-      <div class="rotateText">Так метка распознаётся стабильнее, а видео удобнее смотреть.</div>
+      <div class="rotateText">Так метка распознаётся стабильнее, а “призрак” выглядит лучше.</div>
     </div>
   </div>
 
-  <!-- =========================================================
-    [UI] Оверлей запуска (одна кнопка)
-  ========================================================= -->
+  <!-- [UI] Оверлей запуска -->
   <div id="startOverlay">
     <div class="panel">
-      <h3>Запуск AR</h3>
+      <h3>Призраки прошлого</h3>
       <p>
-        Нажмите кнопку, разрешите доступ к камере и наведите на метку/фото здания.
-        <br><span style="opacity:.75">Видео будет на весь экран.</span>
+        Нажмите кнопку, разрешите доступ к камере и наведите на фото/здание.
+        <br><span style="opacity:.75">Потом уменьшайте прозрачность видео — и увидите “призрак” поверх реальности.</span>
       </p>
       <div class="actions">
         <button class="ghost" id="reloadBtn" type="button">Обновить</button>
         <button class="primary" id="startBtn" type="button">Запустить AR</button>
       </div>
       <p style="margin-top:10px; font-size:12px; opacity:.65">
-        Если будет чёрный экран — чаще всего камера занята другой вкладкой/приложением.
+        Если чёрный экран — камера занята другой вкладкой/приложением.
       </p>
     </div>
   </div>
 
   <!-- =========================================================
-    [UI] Окно видео (будет полноэкранным)
+    [VIDEO] Полноэкранный inline-оверлей (камера остаётся работать под ним)
   ========================================================= -->
   <div id="videoDock">
-    <div id="videoHeader">
-      <div id="videoTitle">Видео</div>
-      <div id="videoHint">Сканирование…</div>
-    </div>
-    <video id="arVideo" playsinline webkit-playsinline muted controls></video>
-  </div>
+    <video id="arVideo" playsinline webkit-playsinline muted></video>
 
-  <!-- =========================================================
-    [UI] Ползунок прозрачности (справа)
-  ========================================================= -->
-  <div id="opacityControl" aria-label="Регулировка прозрачности видео">
-    <div id="opacityLabel">Прозрачность</div>
-    <input id="opacitySlider" type="range" min="20" max="100" value="100" step="1" />
-    <div id="opacityMinMax">
-      <span>20%</span>
-      <span>100%</span>
+    <!-- Наши кнопки (НЕ нативные controls) -->
+    <div id="videoControls">
+      <button class="vbtn" id="playPauseBtn" type="button">⏸ Пауза</button>
+      <div class="vhint" id="videoHint">Сканирование…</div>
+    </div>
+
+    <!-- Ползунок прозрачности -->
+    <div id="opacityControl" aria-label="Регулировка прозрачности видео">
+      <div id="opacityLabel">Прозрачность</div>
+      <input id="opacitySlider" type="range" min="20" max="100" value="100" step="1" />
+      <div id="opacityMinMax">
+        <span>20%</span>
+        <span>100%</span>
+      </div>
     </div>
   </div>
 
@@ -307,22 +300,19 @@
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Контейнер: сюда JS добавит 25 targets (0..24) -->
+      <!-- Контейнер: сюда JS добавит targets 0..24 -->
       <a-entity id="targetsRoot"></a-entity>
     </a-scene>
   </div>
 
   <script>
     /* =========================================================
-      [НАСТРОЙКИ] 1) Где лежит targets.mind
+      [CONFIG] targets.mind
     ========================================================= */
     const TARGETS_PATH = "./targets.mind";
 
     /* =========================================================
-      [НАСТРОЙКИ] 2) Видео и диапазоны меток
-      0..7   -> bulygin
-      8..14  -> naumov
-      15..24 -> pchelin
+      [CONFIG] Видео по группам меток
     ========================================================= */
     const VIDEO_URLS = {
       bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
@@ -338,7 +328,7 @@
     }
 
     /* =========================================================
-      [DOM] Элементы UI
+      [DOM]
     ========================================================= */
     const statusEl = document.getElementById("status");
     const startOverlay = document.getElementById("startOverlay");
@@ -347,13 +337,14 @@
 
     const rotateHint = document.getElementById("rotateHint");
 
-    const videoDock  = document.getElementById("videoDock");
-    const videoTitle = document.getElementById("videoTitle");
-    const videoHint  = document.getElementById("videoHint");
-    const videoEl    = document.getElementById("arVideo");
+    const videoDock = document.getElementById("videoDock");
+    const videoEl = document.getElementById("arVideo");
+    const videoHintEl = document.getElementById("videoHint");
+
+    const playPauseBtn = document.getElementById("playPauseBtn");
 
     const opacityControl = document.getElementById("opacityControl");
-    const opacitySlider  = document.getElementById("opacitySlider");
+    const opacitySlider = document.getElementById("opacitySlider");
 
     const sceneEl = document.getElementById("scene");
     const targetsRoot = document.getElementById("targetsRoot");
@@ -361,74 +352,98 @@
     function setStatus(t){ statusEl.textContent = t; }
 
     /* =========================================================
-      [НОВОЕ] Подсказка поворота телефона
-      - показываем только на телефоне/планшете (pointer: coarse)
-      - и только в портрете
-      - и только после старта AR
+      [ROTATE HINT] показываем только на телефоне/планшете и в портрете
     ========================================================= */
     let arStartedOnce = false;
 
     function isMobileLike(){
       return window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
     }
-
     function isPortrait(){
       if (window.matchMedia) return window.matchMedia("(orientation: portrait)").matches;
       return window.innerHeight > window.innerWidth;
     }
-
     function updateRotateHint(){
-      if (!rotateHint) return;
-
       if (!arStartedOnce){
         rotateHint.style.display = "none";
         return;
       }
-
       if (isMobileLike() && isPortrait()){
         rotateHint.style.display = "flex";
       } else {
         rotateHint.style.display = "none";
       }
     }
-
     window.addEventListener("resize", updateRotateHint);
     window.addEventListener("orientationchange", updateRotateHint);
 
     /* =========================================================
-      [НОВОЕ] Ползунок прозрачности: меняет opacity видео
-      20..100 -> 0.2..1.0
+      [OPACITY] Ползунок прозрачности видео
     ========================================================= */
     opacitySlider.addEventListener("input", () => {
-      const alpha = Number(opacitySlider.value) / 100;
+      const alpha = Number(opacitySlider.value) / 100;  // 0.2..1.0
       videoEl.style.opacity = String(alpha);
     });
 
     /* =========================================================
-      [ЛОГИКА] Создание target-entity 0..24
+      [INLINE VIDEO HARDENING] чтобы не уходило в системный fullscreen
+      Это помогает на части устройств, но 100% гарантий на всех iOS нет. [Unverified]
+    ========================================================= */
+    function hardenInlineVideo(){
+      videoEl.muted = true;                 // стабильнее autoplay
+      videoEl.playsInline = true;           // iOS inline
+      videoEl.setAttribute("playsinline", "");
+      videoEl.setAttribute("webkit-playsinline", "");
+      videoEl.disablePictureInPicture = true;
+      videoEl.setAttribute("disablePictureInPicture", "");
+      videoEl.preload = "auto";
+    }
+    hardenInlineVideo();
+
+    /* =========================================================
+      [PLAY/PAUSE] своя кнопка (без native controls)
+    ========================================================= */
+    playPauseBtn.addEventListener("click", async () => {
+      try{
+        if (videoEl.paused){
+          await videoEl.play();
+          playPauseBtn.textContent = "⏸ Пауза";
+          videoHintEl.textContent = "Видео играет (камера работает)";
+        } else {
+          videoEl.pause();
+          playPauseBtn.textContent = "▶️ Играть";
+          videoHintEl.textContent = "Пауза (камера работает)";
+        }
+      }catch(e){
+        // Если браузер всё равно блокирует воспроизведение — покажем подсказку
+        playPauseBtn.textContent = "▶️ Играть";
+        videoHintEl.textContent = "Нажми ещё раз (браузер блокирует)";
+        console.error(e);
+      }
+    });
+
+    /* =========================================================
+      [TARGETS] Создание target-entity 0..24
     ========================================================= */
     function buildTargets(){
       targetsRoot.innerHTML = "";
-
       for(let i=0; i<=24; i++){
         const holder = document.createElement("a-entity");
         holder.setAttribute("mindar-image-target", `targetIndex: ${i}`);
-
         holder.addEventListener("targetFound", () => onFound(i));
         holder.addEventListener("targetLost",  () => onLost(i));
-
         targetsRoot.appendChild(holder);
       }
     }
 
     /* =========================================================
-      [ЛОГИКА] Видео-управление
-      - при найденной метке ставим нужный mp4 и запускаем
-      - при потере метки НЕ останавливаем
-      - НОВОЕ: видео делаем полноэкранным через CSS класс
-      - НОВОЕ: показываем ползунок прозрачности
+      [VIDEO LOGIC]
+      - при found: показываем видео-оверлей (призрак) и запускаем
+      - при lost: НЕ останавливаем (как ты просил)
+      Камера продолжает работать, потому что MindAR не останавливаем.
     ========================================================= */
     let currentIndex = null;
+    let currentSrc = "";
 
     async function onFound(idx){
       const group = groupByIndex(idx);
@@ -440,40 +455,35 @@
       const src = VIDEO_URLS[group];
       currentIndex = idx;
 
-      // показываем видео + полноэкранный режим
+      // Показываем оверлей с видео и ползунком
       videoDock.style.display = "block";
-      videoDock.classList.add("isFull");
-
-      // скрываем подсказку поворота (видео уже на весь экран — можно убрать)
-      if (rotateHint) rotateHint.style.display = "none";
-
-      // показываем ползунок прозрачности
       opacityControl.style.display = "block";
 
-      // сброс по умолчанию
+      // Сбрасываем прозрачность на 100% (пользователь сам уменьшит)
       opacitySlider.value = "100";
       videoEl.style.opacity = "1";
 
-      // подписи (не видны в fullscreen, но оставим для логики/будущего)
-      videoTitle.textContent = `Видео: ${group} (метка #${idx})`;
-      videoHint.textContent  = "Метка найдена";
+      // Подсказки
+      setStatus(`Метка #${idx} найдена — запускаю “призрака”`);
+      videoHintEl.textContent = `Метка #${idx} найдена — “Призрак” включён`;
 
-      // Если уже играет то же видео — не перезапускаем
-      // videoEl.src превращается в абсолютный URL => проверяем includes
-      if (videoEl.src && videoEl.src.includes(src) && !videoEl.paused){
-        setStatus(`Метка #${idx} — продолжаю видео`);
+      // Если это то же видео и оно уже играет — не перезапускаем
+      if (currentSrc === src && !videoEl.paused){
         return;
       }
 
       // Меняем источник
+      currentSrc = src;
       videoEl.src = src;
 
-      // Попробуем autoplay (muted помогает)
+      // Пытаемся запустить. muted помогает.
       try{
         await videoEl.play();
-        setStatus(`Метка #${idx} — видео играет`);
+        playPauseBtn.textContent = "⏸ Пауза";
       }catch(e){
-        setStatus(`Метка #${idx} — нажми Play (автозапуск заблокирован)`);
+        // Если автозапуск заблокирован — пользователь нажмёт нашу кнопку Play
+        playPauseBtn.textContent = "▶️ Играть";
+        videoHintEl.textContent = "Нажми ▶️ Играть (автозапуск заблокирован)";
         console.error(e);
       }
     }
@@ -481,12 +491,13 @@
     function onLost(idx){
       if (idx === currentIndex){
         setStatus(`Метка #${idx} потеряна — видео продолжается`);
+        videoHintEl.textContent = "Метка потеряна — “призрак” продолжается";
       }
       // НИЧЕГО не останавливаем
     }
 
     /* =========================================================
-      [ЛОГИКА] Запуск MindAR
+      [START AR]
     ========================================================= */
     async function checkTargetsFile(){
       sceneEl.setAttribute(
@@ -496,9 +507,7 @@
 
       try{
         const r = await fetch(TARGETS_PATH, { cache: "no-store" });
-        if(!r.ok){
-          throw new Error(`targets.mind не найден: HTTP ${r.status}`);
-        }
+        if(!r.ok) throw new Error(`targets.mind не найден: HTTP ${r.status}`);
         return true;
       }catch(e){
         setStatus("targets.mind не загрузился — проверь путь и GitHub Pages");
@@ -516,7 +525,7 @@
 
       const mindar = sceneEl.systems["mindar-image-system"];
       if(!mindar){
-        setStatus("MindAR system не найден (ошибка подключения MindAR)");
+        setStatus("MindAR system не найден");
         alert("MindAR system не найден. Проверь подключение mindar-image-aframe.prod.js");
         return;
       }
@@ -527,7 +536,6 @@
         setStatus("Камера запущена — наведи на метку");
         startOverlay.style.display = "none";
 
-        // активируем подсказку поворота на телефоне
         arStartedOnce = true;
         updateRotateHint();
       }catch(e){
@@ -538,12 +546,11 @@
     }
 
     /* =========================================================
-      [СОБЫТИЯ UI]
+      [UI EVENTS]
     ========================================================= */
     reloadBtn.addEventListener("click", () => location.reload());
     startBtn.addEventListener("click", startAR);
 
-    // На старте — просто статус
     setStatus("Нажмите «Запустить AR»");
   </script>
 </body>
