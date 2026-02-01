@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>AR — Видео по меткам</title>
+  <title>AR — Видео по меткам23</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 
   <!-- A-Frame + MindAR (как в твоём рабочем файле) -->
@@ -144,6 +144,7 @@
       display:block;
       background:#000;
       object-fit:cover;
+      opacity: 1; /* будет меняться ползунком */
     }
 
     @media (max-width: 420px){
@@ -163,35 +164,81 @@
       backdrop-filter:none;
       box-shadow:none;
     }
+
+    /* [НОВОЕ] Убираем нижнюю надпись/панель при полноэкранном видео */
     #videoDock.isFull #videoHeader{
-      position:absolute;
-      left:12px; right:12px;
-      bottom:12px;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:14px;
-      background:rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      z-index:2;
+      display: none !important;
     }
+
     #videoDock.isFull #arVideo{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
-      object-fit:contain; /* важно: не обрезаем */
+      object-fit:contain;
+    }
+
+    /* =========================================================
+      [НОВОЕ] Ползунок прозрачности (справа)
+      - появляется только когда видео включено
+========================================================= */
+    #opacityControl{
+      position: fixed;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10060; /* выше videoDock и выше всего */
+      display: none;  /* покажем через JS */
+      padding: 12px 10px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: rgba(255,255,255,.92);
+      user-select: none;
+    }
+
+    #opacityLabel{
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 10px;
+      opacity: .9;
+    }
+
+    /* Вертикальный ползунок (через поворот) */
+    #opacitySlider{
+      width: 220px;     /* станет "высотой" после rotate */
+      height: 28px;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      cursor: pointer;
+    }
+
+    #opacityMinMax{
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      opacity: .75;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- [UI] Верхняя панель -->
+  <!-- =========================================================
+    [UI] Верхняя панель
+  ========================================================= -->
   <div class="topBar">
     <a class="pillBtn" href="./index.html">← Назад</a>
     <div class="status" id="status">Нажмите «Запустить AR»</div>
   </div>
 
-  <!-- [НОВОЕ UI] Подсказка поворота -->
+  <!-- =========================================================
+    [UI] Подсказка поворота (телефон, портрет)
+  ========================================================= -->
   <div id="rotateHint" aria-hidden="true">
     <div class="rotateCard">
       <div class="rotateIcon">📱↻</div>
@@ -200,7 +247,9 @@
     </div>
   </div>
 
-  <!-- [UI] Оверлей запуска -->
+  <!-- =========================================================
+    [UI] Оверлей запуска (одна кнопка)
+  ========================================================= -->
   <div id="startOverlay">
     <div class="panel">
       <h3>Запуск AR</h3>
@@ -218,7 +267,9 @@
     </div>
   </div>
 
-  <!-- [UI] Окно видео -->
+  <!-- =========================================================
+    [UI] Окно видео (будет полноэкранным)
+  ========================================================= -->
   <div id="videoDock">
     <div id="videoHeader">
       <div id="videoTitle">Видео</div>
@@ -227,7 +278,21 @@
     <video id="arVideo" playsinline webkit-playsinline muted controls></video>
   </div>
 
-  <!-- [AR] A-Frame сцена -->
+  <!-- =========================================================
+    [UI] Ползунок прозрачности (справа)
+  ========================================================= -->
+  <div id="opacityControl" aria-label="Регулировка прозрачности видео">
+    <div id="opacityLabel">Прозрачность</div>
+    <input id="opacitySlider" type="range" min="20" max="100" value="100" step="1" />
+    <div id="opacityMinMax">
+      <span>20%</span>
+      <span>100%</span>
+    </div>
+  </div>
+
+  <!-- =========================================================
+    [AR] A-Frame сцена
+  ========================================================= -->
   <div id="ar">
     <a-scene
       id="scene"
@@ -241,18 +306,23 @@
       <a-entity light="type: directional; intensity: 0.9" position="1 2 1"></a-entity>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Контейнер: сюда JS добавит 25 targets (0..24) -->
       <a-entity id="targetsRoot"></a-entity>
     </a-scene>
   </div>
 
   <script>
     /* =========================================================
-      [НАСТРОЙКИ] targets.mind
+      [НАСТРОЙКИ] 1) Где лежит targets.mind
     ========================================================= */
     const TARGETS_PATH = "./targets.mind";
 
     /* =========================================================
-      [НАСТРОЙКИ] Видео (ты уже поставил рабочие ссылки)
+      [НАСТРОЙКИ] 2) Видео и диапазоны меток
+      0..7   -> bulygin
+      8..14  -> naumov
+      15..24 -> pchelin
     ========================================================= */
     const VIDEO_URLS = {
       bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
@@ -268,7 +338,7 @@
     }
 
     /* =========================================================
-      [DOM]
+      [DOM] Элементы UI
     ========================================================= */
     const statusEl = document.getElementById("status");
     const startOverlay = document.getElementById("startOverlay");
@@ -282,6 +352,9 @@
     const videoHint  = document.getElementById("videoHint");
     const videoEl    = document.getElementById("arVideo");
 
+    const opacityControl = document.getElementById("opacityControl");
+    const opacitySlider  = document.getElementById("opacitySlider");
+
     const sceneEl = document.getElementById("scene");
     const targetsRoot = document.getElementById("targetsRoot");
 
@@ -289,9 +362,9 @@
 
     /* =========================================================
       [НОВОЕ] Подсказка поворота телефона
-      - показываем только на "coarse pointer" (обычно телефон/планшет)
-      - только если портрет
-      - только после старта AR
+      - показываем только на телефоне/планшете (pointer: coarse)
+      - и только в портрете
+      - и только после старта AR
     ========================================================= */
     let arStartedOnce = false;
 
@@ -323,7 +396,16 @@
     window.addEventListener("orientationchange", updateRotateHint);
 
     /* =========================================================
-      [ЛОГИКА] Создание меток 0..24
+      [НОВОЕ] Ползунок прозрачности: меняет opacity видео
+      20..100 -> 0.2..1.0
+    ========================================================= */
+    opacitySlider.addEventListener("input", () => {
+      const alpha = Number(opacitySlider.value) / 100;
+      videoEl.style.opacity = String(alpha);
+    });
+
+    /* =========================================================
+      [ЛОГИКА] Создание target-entity 0..24
     ========================================================= */
     function buildTargets(){
       targetsRoot.innerHTML = "";
@@ -331,17 +413,20 @@
       for(let i=0; i<=24; i++){
         const holder = document.createElement("a-entity");
         holder.setAttribute("mindar-image-target", `targetIndex: ${i}`);
+
         holder.addEventListener("targetFound", () => onFound(i));
         holder.addEventListener("targetLost",  () => onLost(i));
+
         targetsRoot.appendChild(holder);
       }
     }
 
     /* =========================================================
-      [ЛОГИКА] Видео
-      НОВОЕ:
-      - включаем полноэкранный режим CSS-классом .isFull
+      [ЛОГИКА] Видео-управление
+      - при найденной метке ставим нужный mp4 и запускаем
       - при потере метки НЕ останавливаем
+      - НОВОЕ: видео делаем полноэкранным через CSS класс
+      - НОВОЕ: показываем ползунок прозрачности
     ========================================================= */
     let currentIndex = null;
 
@@ -355,30 +440,40 @@
       const src = VIDEO_URLS[group];
       currentIndex = idx;
 
-      // показываем видео
+      // показываем видео + полноэкранный режим
       videoDock.style.display = "block";
-
-      // делаем видео на весь экран
       videoDock.classList.add("isFull");
 
+      // скрываем подсказку поворота (видео уже на весь экран — можно убрать)
+      if (rotateHint) rotateHint.style.display = "none";
+
+      // показываем ползунок прозрачности
+      opacityControl.style.display = "block";
+
+      // сброс по умолчанию
+      opacitySlider.value = "100";
+      videoEl.style.opacity = "1";
+
+      // подписи (не видны в fullscreen, но оставим для логики/будущего)
       videoTitle.textContent = `Видео: ${group} (метка #${idx})`;
       videoHint.textContent  = "Метка найдена";
 
-      // ВАЖНО: videoEl.src становится абсолютным URL.
-      // Поэтому сравниваем через includes.
+      // Если уже играет то же видео — не перезапускаем
+      // videoEl.src превращается в абсолютный URL => проверяем includes
       if (videoEl.src && videoEl.src.includes(src) && !videoEl.paused){
         setStatus(`Метка #${idx} — продолжаю видео`);
         return;
       }
 
+      // Меняем источник
       videoEl.src = src;
 
+      // Попробуем autoplay (muted помогает)
       try{
         await videoEl.play();
         setStatus(`Метка #${idx} — видео играет`);
       }catch(e){
         setStatus(`Метка #${idx} — нажми Play (автозапуск заблокирован)`);
-        videoHint.textContent = "Нажми Play";
         console.error(e);
       }
     }
@@ -386,12 +481,12 @@
     function onLost(idx){
       if (idx === currentIndex){
         setStatus(`Метка #${idx} потеряна — видео продолжается`);
-        videoHint.textContent = "Метка потеряна — видео продолжается";
       }
+      // НИЧЕГО не останавливаем
     }
 
     /* =========================================================
-      [ЛОГИКА] Запуск MindAR — НЕ МЕНЯЕМ
+      [ЛОГИКА] Запуск MindAR
     ========================================================= */
     async function checkTargetsFile(){
       sceneEl.setAttribute(
@@ -401,7 +496,9 @@
 
       try{
         const r = await fetch(TARGETS_PATH, { cache: "no-store" });
-        if(!r.ok) throw new Error(`targets.mind не найден: HTTP ${r.status}`);
+        if(!r.ok){
+          throw new Error(`targets.mind не найден: HTTP ${r.status}`);
+        }
         return true;
       }catch(e){
         setStatus("targets.mind не загрузился — проверь путь и GitHub Pages");
@@ -419,7 +516,7 @@
 
       const mindar = sceneEl.systems["mindar-image-system"];
       if(!mindar){
-        setStatus("MindAR system не найден");
+        setStatus("MindAR system не найден (ошибка подключения MindAR)");
         alert("MindAR system не найден. Проверь подключение mindar-image-aframe.prod.js");
         return;
       }
@@ -430,7 +527,7 @@
         setStatus("Камера запущена — наведи на метку");
         startOverlay.style.display = "none";
 
-        // включаем проверку поворота после старта
+        // активируем подсказку поворота на телефоне
         arStartedOnce = true;
         updateRotateHint();
       }catch(e){
@@ -446,6 +543,7 @@
     reloadBtn.addEventListener("click", () => location.reload());
     startBtn.addEventListener("click", startAR);
 
+    // На старте — просто статус
     setStatus("Нажмите «Запустить AR»");
   </script>
 </body>
