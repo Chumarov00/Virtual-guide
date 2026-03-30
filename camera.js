@@ -26,8 +26,8 @@ const VIDEO_URLS = {
   bulygin: "./videos/bulygin.mp4",
   naumov:  "./videos/naumov.mp4",
   pchelin: "./videos/pchelin.mp4",
-  catherine: "./videos/Embankment (Catherine).mp4",
-  pushkin: "./videos/Embankment (Pushkin).mp4",
+  catherine: "./videos/catherine.mp4",
+  pushkin: "./videos/pushkin.mp4",
 };
 
 /* =========================================================
