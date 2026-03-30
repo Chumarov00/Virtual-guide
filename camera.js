@@ -26,8 +26,8 @@ const VIDEO_URLS = {
   bulygin: "./videos/bulygin.mp4",
   naumov:  "./videos/naumov.mp4",
   pchelin: "./videos/pchelin.mp4",
-  catherine: "./videos/catherine.mp4",
-  pushkin: "./videos/pushkin.mp4",
+  catherine: "https://github.com/Chumarov00/Virtual-guide/blob/main/Embankment(Catherine).mp4",
+  pushkin: "https://github.com/Chumarov00/Virtual-guide/blob/main/Embankment(Pushkin).mp4",
 };
 
 /* =========================================================
