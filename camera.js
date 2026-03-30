@@ -26,15 +26,19 @@ const VIDEO_URLS = {
   bulygin: "./videos/bulygin.mp4",
   naumov:  "./videos/naumov.mp4",
   pchelin: "./videos/pchelin.mp4",
+  catherine: "./videos/Embankment (Catherine).mp4",
+  pushkin: "./videos/Embankment (Pushkin).mp4",
 };
 
 /* =========================================================
   (C) Правило: индекс метки -> группа видео
 ========================================================= */
 function groupByIndex(i){
-  if (i >= 0 && i <= 7)  return "bulygin";
-  if (i >= 8 && i <= 14) return "naumov";
-  if (i >= 15 && i <= 24) return "pchelin";
+  if (i >= 0 && i <= 5)  return "bulygin";
+  if (i >= 6 && i <= 10) return "naumov";
+  if (i >= 11 && i <= 15) return "pchelin";
+  if (i >= 16 && i <= 20) return "catherine";
+  if (i >= 21 && i <= 25) return "pushkin";
   return null;
 }
 
@@ -86,7 +90,7 @@ async function checkTargetsFile(){
 ========================================================= */
 function buildTargets(){
   targetsRoot.innerHTML = "";
-  for(let i = 0; i <= 24; i++){
+  for(let i = 0; i <= 25; i++){
     const holder = document.createElement("a-entity");
     holder.setAttribute("mindar-image-target", `targetIndex: ${i}`);
     holder.addEventListener("targetFound", () => onFound(i));
