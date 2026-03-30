@@ -313,13 +313,17 @@
     const VIDEO_URLS = {
       bulygin: "https://chumarov00.github.io/Virtual-guide/Bulygin%27s%20House.mp4",
       naumov:  "https://chumarov00.github.io/Virtual-guide/Naumov%27s%20house.mp4",
-      pchelin: "https://chumarov00.github.io/Virtual-guide/Pchelin%27s%20House.MP4"
+      pchelin: "https://chumarov00.github.io/Virtual-guide/Pchelin%27s%20House.MP4",
+      catherine:  "https://github.com/Chumarov00/Virtual-guide/blob/main/Embankment(Catherine).mp4",
+      pushkin: "https://github.com/Chumarov00/Virtual-guide/blob/main/Embankment(Pushkin).mp4"
     };
 
     function groupByIndex(i){
-      if (i >= 0 && i <= 7) return "bulygin";
-      if (i >= 8 && i <= 14) return "naumov";
-      if (i >= 15 && i <= 24) return "pchelin";
+      if (i >= 0 && i <= 5) return "bulygin";
+      if (i >= 6 && i <= 10) return "naumov";
+      if (i >= 11 && i <= 15) return "pchelin";
+      if (i >= 16 && i <= 20) return "catherine";
+      if (i >= 21 && i <= 25) return "pushkin";
       return null;
     }
 
@@ -417,7 +421,7 @@
     ========================================================= */
     function buildTargets(){
       targetsRoot.innerHTML = "";
-      for(let i=0; i<=24; i++){
+      for(let i=0; i<=25; i++){
         const holder = document.createElement("a-entity");
         holder.setAttribute("mindar-image-target", `targetIndex: ${i}`);
         holder.addEventListener("targetFound", () => onFound(i));
